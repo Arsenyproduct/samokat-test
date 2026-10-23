@@ -1,4 +1,4 @@
-import { collection, formatPrice, products } from '../data/catalog';
+import { collection, formatPrice } from '../data/catalog';
 import { Icon } from '../components/Icon';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { IconButton, StatusBar, useEnterLoading } from '../components/ui';
@@ -28,7 +28,7 @@ export function Collection() {
               <div key={id} className={screenStyles.reveal}>
                 <ProductCard
                   id={id}
-                  onOpen={products[id].detail ? () => navigate({ name: 'product', id }) : undefined}
+                  onOpen={() => navigate({ name: 'product', id })}
                 />
               </div>
             ),

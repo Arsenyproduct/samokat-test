@@ -75,7 +75,7 @@ export type Product = {
   amount: string;
   /** Green hint after the amount ("для хвостиков", "привезём горячим"). */
   hint?: string;
-  /** Detail sheet, only for products that have a frame in Figma. */
+  /** Partner delivery block on the product sheet; Самокат products have none. */
   detail?: {
     delivery: string;
     note: string;
@@ -132,6 +132,10 @@ export const products: Record<ProductId, Product> = {
     cartTitle: 'Игрушка для собак «Лиса» с канатом',
     amount: '1 шт',
     hint: 'для хвостиков',
+    detail: {
+      delivery: 'Привезёт 4 лапы, около часа',
+      note: 'Это партнёрский товар. Срок доставки отличается от Самоката, остальное в заказе приедет как обычно.',
+    },
   },
   combo: {
     id: 'combo',
@@ -155,6 +159,10 @@ export const products: Record<ProductId, Product> = {
     title: 'Гречневая крупа Лента, 800 г',
     cartTitle: 'Гречневая крупа Лента, 800 г',
     amount: '800 г',
+    detail: {
+      delivery: 'Привезёт Лента, от 3 часов',
+      note: 'Это партнёрский товар. Срок доставки отличается от Самоката, остальное в заказе приедет как обычно.',
+    },
   },
 };
 

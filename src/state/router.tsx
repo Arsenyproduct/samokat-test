@@ -11,7 +11,7 @@ export type Route =
   | { name: 'checkout' }
   | { name: 'tracking' };
 
-const productIds: ProductId[] = ['nurofen', 'combo'];
+const productIds: ProductId[] = ['milk', 'ice', 'cookie', 'nurofen', 'toy', 'combo', 'buckwheat'];
 
 export function routeToHash(route: Route) {
   return route.name === 'product' ? `#/product/${route.id}` : `#/${route.name}`;
