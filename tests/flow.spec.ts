@@ -184,7 +184,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
 
   // 8. Delay after 6 seconds, then merge
   await expect(page.getByRole('heading', { name: '4 лапы задерживаются' })).toBeVisible({ timeout: 9000 });
-  await expect(page.getByText('Нет игрушки на складе')).toBeVisible();
+  await expect(page.getByText('На складе нет игрушки')).toBeVisible();
   await shot('delay');
   await page.getByRole('button', { name: 'Объединить' }).click();
   await expect(page.getByText('4 лапы, Лента')).toBeVisible();
@@ -217,5 +217,55 @@ test('delay proposal can be dismissed with «Оставить»', async ({ page 
   await expect(page.getByText('Заказ у двери', { exact: true })).toHaveCount(3, { timeout: 40_000 });
   await page.waitForTimeout(400);
   await page.screenshot({ path: `tests/screenshots/${testInfo.project.name}/17-delay-kept.png` });
+  expect(problems, problems.join('\n')).toEqual([]);
+});
+
+test('change the order while stores have not started, then the button disappears', async ({ page }, testInfo) => {
+  const problems = watchConsole(page);
+  const dir = `tests/screenshots/${testInfo.project.name}`;
+  await page.goto('#/collection');
+  await page.getByRole('button', { name: /Открыть: Нурофен/ }).click();
+  await page.getByRole('button', { name: /Добавить в корзину: Нурофен/ }).click();
+  await page.goBack();
+  await page.getByRole('button', { name: /Открыть: Комбо/ }).click();
+  await page.getByRole('button', { name: /Добавить в корзину: Комбо/ }).click();
+  await page.goto('#/checkout');
+  await page.getByRole('button', { name: 'Оплатить' }).click();
+
+  // One button for the whole order
+  const change = page.getByRole('button', { name: 'Изменить заказ' });
+  await expect(change).toBeVisible();
+  await change.click();
+  await expect(page.getByRole('heading', { name: 'Изменить заказ' })).toBeVisible();
+  await expect(page.getByText('Что ещё можно менять')).toBeVisible();
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${dir}/20-edit.png` });
+
+  // Remove the buckwheat: Лента is still open for changes
+  await page.getByRole('button', { name: /Убрать товар/ }).click();
+  await expect(page.getByRole('heading', { name: 'Состав заказа' })).toBeVisible();
+  await page.getByRole('button', { name: 'Убрать: Гречневая крупа Лента, 800 г' }).click();
+  await expect(page.getByText(/^\+\s119\s₽ на карту$/)).toBeVisible();
+  await page.screenshot({ path: `${dir}/21-edit-items.png` });
+  await page.getByRole('button', { name: 'Сохранить изменения' }).click();
+  await expect(page.getByRole('heading', { name: /Первым приедет/ })).toBeVisible();
+  await expect(page.getByText('Лента', { exact: true })).toHaveCount(0);
+
+  // Cancel is not possible: Самокат is already on its way
+  await page.getByRole('button', { name: 'Изменить заказ' }).click();
+  await page.getByRole('button', { name: /Отменить заказ/ }).click();
+  await expect(page.getByRole('heading', { name: 'Отменить весь заказ?' })).toBeVisible();
+  await page.screenshot({ path: `${dir}/22-cancel.png` });
+  await page.getByRole('button', { name: 'Отменить заказ' }).last().click();
+  await expect(page.getByRole('heading', { name: 'Заказ уже собирают' })).toBeVisible();
+  await page.screenshot({ path: `${dir}/23-cancel-blocked.png` });
+  await page.getByRole('button', { name: 'Вернуться к заказу' }).click();
+  await expect(page.getByRole('heading', { name: /Первым приедет/ })).toBeVisible();
+
+  // The clock stood still on the change screens, so Шоколадница can still be changed
+  await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Изменить заказ' })).toBeVisible();
+  // Once every store has started, the button is gone
+  await expect(page.getByRole('button', { name: 'Изменить заказ' })).toHaveCount(0, { timeout: 25_000 });
   expect(problems, problems.join('\n')).toEqual([]);
 });

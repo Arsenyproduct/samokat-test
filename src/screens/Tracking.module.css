@@ -144,3 +144,8 @@
   flex: 1;
   min-width: 0;
 }
+
+/* Button / Изменить заказ (frame 2.4): one button for the whole order */
+.editOrder {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}

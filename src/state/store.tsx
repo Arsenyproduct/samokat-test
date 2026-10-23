@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { cartCopy, initialCart, products, type ProductId, type StoreId } from '../data/catalog';
 import { DEFAULT_SCENARIO, type ScenarioId } from '../data/delivery';
 
-type Cart = Partial<Record<ProductId, number>>;
+export type Cart = Partial<Record<ProductId, number>>;
 
 type PersistedState = {
   cart: Cart;
@@ -13,7 +13,15 @@ type PersistedState = {
   scenario: ScenarioId;
   /** Scenario the order was paid with; drives the tracking screen. */
   paidScenario: ScenarioId | null;
+  /** Tracking time already run, ms. It pauses while the order change screens are open. */
+  trackBase: number;
+  /** When the tracking clock last started running (ms since epoch); null while paused. */
+  trackRunningSince: number | null;
+  /** Answer to the delay proposal on tracking. */
+  delayDecision: DelayDecision;
 };
+
+export type DelayDecision = 'merged' | 'kept' | null;
 
 type Store = PersistedState & {
   add: (id: ProductId) => void;
@@ -24,6 +32,15 @@ type Store = PersistedState & {
   setUseBonus: (value: boolean) => void;
   setScenario: (value: ScenarioId) => void;
   pay: () => void;
+  /** Runs the tracking clock (tracking screen is open). */
+  resumeTracking: () => void;
+  /** Freezes the tracking clock (order change screens are open). */
+  pauseTracking: () => void;
+  setDelayDecision: (value: DelayDecision) => void;
+  /** Replaces the order contents after «Сохранить изменения». */
+  setCart: (cart: Cart) => void;
+  /** Cancels the whole order: the prototype starts over with the initial cart. */
+  cancelOrder: () => void;
   /** Sum of the items only, as on the cart button in the catalog. */
   itemsTotal: number;
   /** Goods + packing, before bonuses and delivery. */
@@ -44,6 +61,9 @@ const defaults: PersistedState = {
   useBonus: true,
   scenario: DEFAULT_SCENARIO,
   paidScenario: null,
+  trackBase: 0,
+  trackRunningSince: null,
+  delayDecision: null,
 };
 
 function load(): PersistedState {
@@ -105,7 +125,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setOrderForOther: (orderForOther) => setState((s) => ({ ...s, orderForOther })),
       setUseBonus: (useBonus) => setState((s) => ({ ...s, useBonus })),
       setScenario: (scenario) => setState((s) => ({ ...s, scenario })),
-      pay: () => setState((s) => ({ ...s, paidScenario: s.scenario })),
+      pay: () =>
+        setState((s) => ({ ...s, paidScenario: s.scenario, trackBase: 0, trackRunningSince: Date.now(), delayDecision: null })),
+      resumeTracking: () => setState((s) => (s.trackRunningSince === null ? { ...s, trackRunningSince: Date.now() } : s)),
+      pauseTracking: () =>
+        setState((s) =>
+          s.trackRunningSince === null
+            ? s
+            : { ...s, trackBase: s.trackBase + Date.now() - s.trackRunningSince, trackRunningSince: null },
+        ),
+      setDelayDecision: (delayDecision) => setState((s) => ({ ...s, delayDecision })),
+      setCart: (cart) => setState((s) => ({ ...s, cart })),
+      cancelOrder: () =>
+        setState((s) => ({ ...s, cart: initialCart, paidScenario: null, trackBase: 0, trackRunningSince: null, delayDecision: null })),
       itemsTotal: goods,
       goodsTotal,
       cartTotal: goodsTotal - bonus,

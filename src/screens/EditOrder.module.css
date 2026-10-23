@@ -1,0 +1,340 @@
+/* 4.1 Изменить заказ (407:505), 4.2 Состав заказа (407:578), 4.3 Отмена (408:413), 4.4 (408:501) */
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: calc(var(--statusbar-h) + 60px) var(--space-16) calc(24px + var(--safe-bottom));
+}
+
+.back {
+  position: absolute;
+  left: 16px;
+  top: calc(var(--statusbar-h) + 8px);
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-card);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  z-index: 31;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.back:active {
+  transform: scale(0.94);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: 0 var(--space-4) var(--space-8);
+}
+.title {
+  font: 700 26px/33px var(--font);
+  color: var(--text-primary);
+}
+.subtitle {
+  font: 500 14px/18px var(--font);
+  color: var(--text-secondary);
+}
+.muted {
+  color: var(--text-secondary);
+}
+
+/* Action rows of 4.1 */
+.action {
+  display: flex;
+  align-items: center;
+  gap: var(--space-14);
+  width: 100%;
+  padding: var(--space-14) var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+  text-align: left;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.action:active {
+  transform: scale(0.98);
+}
+.actionIcon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-page);
+  color: var(--text-primary);
+}
+.actionIconDanger {
+  background: var(--brand-red-tint);
+  color: var(--brand-red);
+}
+.actionText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.actionTitle {
+  font: 700 16px/20px var(--font);
+  color: var(--text-primary);
+}
+.actionTitleDanger {
+  color: var(--brand-red);
+}
+.actionNote {
+  font: 500 13px/16px var(--font);
+  color: var(--text-secondary);
+}
+.chev {
+  flex: none;
+  color: var(--text-secondary);
+}
+
+/* Store status card */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+}
+.cardTitle {
+  font: 700 15px/19px var(--font);
+  color: var(--text-primary);
+}
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.statusText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+.storeName {
+  font: 700 14px/18px var(--font);
+  color: var(--text-primary);
+}
+.storeStatus {
+  font: 500 12px/15px var(--font);
+  color: var(--text-secondary);
+}
+
+.chip {
+  flex: none;
+  padding: var(--space-4) var(--space-10);
+  border-radius: var(--radius-pill);
+  font: 700 12px/15px var(--font);
+  white-space: nowrap;
+  transition: background-color var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.chipCan {
+  background: var(--state-green-tint);
+  color: var(--state-green);
+}
+.chipCannot {
+  background: var(--bg-tile);
+  color: var(--text-secondary);
+}
+.chipOnTile {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+
+/* 4.2 items */
+.storeHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.storeHeadName {
+  flex: 1;
+  min-width: 0;
+  font: 700 15px/19px var(--font);
+  color: var(--text-primary);
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+.itemPhoto {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-chip);
+  object-fit: cover;
+}
+.itemText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--text-primary);
+}
+.itemName {
+  font: 500 13px/16px var(--font);
+}
+.itemPrice {
+  font: 700 15px/19px var(--font);
+}
+.itemRemoved .itemPhoto,
+.itemRemoved .itemText {
+  opacity: 0.45;
+}
+
+.locked {
+  background: var(--bg-tile);
+}
+.locked .itemPhoto {
+  opacity: 0.5;
+}
+.locked .itemText {
+  color: var(--text-secondary);
+}
+.lockedStore {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+.count {
+  flex: none;
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  font: 700 13px/16px var(--font);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.lockedNote {
+  font: 500 13px/16px var(--font);
+  color: var(--text-secondary);
+}
+
+.withBar {
+  padding-bottom: calc(150px + var(--safe-bottom));
+}
+.bottomBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding: var(--space-14) var(--space-16) calc(24px + var(--safe-bottom));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--bg-card);
+  z-index: 5;
+}
+.sum {
+  display: flex;
+  align-items: center;
+  min-height: 19px;
+}
+.sumLabel {
+  flex: 1;
+  font: 500 13px/16px var(--font);
+  color: var(--text-secondary);
+}
+.sumValue {
+  font: 700 15px/19px var(--font);
+  color: var(--state-green);
+  white-space: nowrap;
+}
+
+/* 4.3 cancel sheet */
+.dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 40;
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-10) var(--space-16) calc(24px + var(--safe-bottom));
+  border-radius: 32px 32px 0 0;
+  background: var(--bg-card);
+  z-index: 41;
+  animation: sheet-in var(--dur-slow) var(--ease-out) backwards;
+}
+.sheetGrabber {
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--bg-dark-pill);
+  opacity: 0.35;
+}
+.sheetTitle {
+  font: 700 24px/30px var(--font);
+  color: var(--text-primary);
+}
+.sheetText {
+  font: 500 14px/18px var(--font);
+  color: var(--text-secondary);
+}
+.sheetStores {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font: 500 13px/16px var(--font);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* 4.4 result */
+.result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  padding: var(--statusbar-h) var(--space-24) var(--safe-bottom);
+  background: var(--bg-card);
+  text-align: center;
+}
+.resultIcon {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-page);
+  color: var(--brand-red);
+  margin-bottom: var(--space-12);
+}
+.resultTitle {
+  font: 700 24px/30px var(--font);
+  color: var(--text-primary);
+}
+.resultText {
+  font: 500 15px/19px var(--font);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-20);
+}
+.resultNote {
+  font: 500 13px/16px var(--font);
+  color: var(--text-secondary);
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}

@@ -1,24 +1,22 @@
-// Map from frames 2.4 / 2.5 (378:352): city blocks, river, four routes to the
-// home pin, store pins and couriers. Drawn as one SVG so it scales as a whole.
+// Map from frames 2.4–2.6 (378:352): city blocks, river, and for every trip
+// still on its way a store pin, a route to home and a courier. Drawn as one SVG
+// so it scales as a whole.
 
 import { stores, type StoreId } from '../data/catalog';
 
 type Point = [number, number];
 
-/** Route polylines from the store pin to home, in frame coordinates. */
-const routes: Record<Exclude<StoreId, 'eapteka'>, Point[]> = {
-  shokoladnitsa: [[79, 57], [79, 225], [235, 225]],
-  samokat: [[313, 115], [235, 115], [235, 231]],
-  '4lapy': [[157, 289], [157, 237], [235, 237]],
-  lenta: [[313, 289], [313, 231], [235, 231]],
+/**
+ * Where each store sits on the map and how its courier drives home (frame
+ * coordinates from 2.4 and 2.5). A trip is drawn at the store that leads it.
+ */
+const places: Record<StoreId, { pin: Point; route: Point[] }> = {
+  samokat: { pin: [296, 98], route: [[313, 115], [235, 115], [235, 231]] },
+  lenta: { pin: [296, 272], route: [[313, 289], [313, 231], [235, 231]] },
+  '4lapy': { pin: [140, 272], route: [[157, 289], [157, 237], [235, 237]] },
+  shokoladnitsa: { pin: [63, 293], route: [[80, 310], [80, 254], [235, 254]] },
+  eapteka: { pin: [62, 40], route: [[79, 57], [79, 225], [235, 225]] },
 };
-
-const pins: { store: StoreId; x: number; y: number }[] = [
-  { store: 'shokoladnitsa', x: 62, y: 40 },
-  { store: 'samokat', x: 296, y: 98 },
-  { store: '4lapy', x: 140, y: 272 },
-  { store: 'lenta', x: 296, y: 272 },
-];
 
 const columns = [-70, 8, 86, 164, 242, 320, 398];
 const rows = [-52, 6, 64, 122, 180, 238, 296, 354];
@@ -54,8 +52,10 @@ function CourierGlyph() {
   );
 }
 
-/** `couriers` holds the share of each route already driven (0 at the store, 1 at home). */
-export function TrackingMap({ couriers }: { couriers: Partial<Record<keyof typeof routes, number>> }) {
+export type MapTrip = { store: StoreId; share: number };
+
+/** `trips` are the rows still on their way: store leading the row and the share already driven. */
+export function TrackingMap({ trips }: { trips: MapTrip[] }) {
   return (
     <svg
       className="tracking-map"
@@ -68,9 +68,9 @@ export function TrackingMap({ couriers }: { couriers: Partial<Record<keyof typeo
       style={{ display: 'block', background: 'var(--bg-card)' }}
     >
       <defs>
-        {pins.map((pin) => (
-          <clipPath key={pin.store} id={`pin-${pin.store}`}>
-            <circle cx={pin.x + 17} cy={pin.y + 17} r="17" />
+        {trips.map(({ store }) => (
+          <clipPath key={store} id={`pin-${store}`}>
+            <circle cx={places[store].pin[0] + 17} cy={places[store].pin[1] + 17} r="17" />
           </clipPath>
         ))}
       </defs>
@@ -91,11 +91,11 @@ export function TrackingMap({ couriers }: { couriers: Partial<Record<keyof typeo
         strokeLinecap="round"
       />
 
-      {Object.values(routes).map((line, i) => (
-        <path key={`casing-${i}`} d={toPath(line)} fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      {trips.map(({ store }) => (
+        <path key={`casing-${store}`} d={toPath(places[store].route)} fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
       ))}
-      {(Object.keys(routes) as (keyof typeof routes)[]).map((store) => (
-        <path key={store} d={toPath(routes[store])} fill="none" stroke={stores[store].color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      {trips.map(({ store }) => (
+        <path key={store} d={toPath(places[store].route)} fill="none" stroke={stores[store].color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       ))}
 
       <g fontFamily="Onest, sans-serif" fontWeight="500" fontSize="9" fill="var(--map-label)">
@@ -104,8 +104,8 @@ export function TrackingMap({ couriers }: { couriers: Partial<Record<keyof typeo
         <text x="243" y="301">просп. Мира</text>
       </g>
 
-      {(Object.keys(routes) as (keyof typeof routes)[]).map((store) => {
-        const [x, y] = pointAt(routes[store], couriers[store] ?? 0.5);
+      {trips.map(({ store, share }) => {
+        const [x, y] = pointAt(places[store].route, 0.5 + 0.5 * share);
         return (
           <g key={store} className="tracking-courier" style={{ transform: `translate(${x}px, ${y}px)` }}>
             <circle r="11.75" fill={stores[store].color} stroke="#fff" strokeWidth="2.5" />
@@ -114,19 +114,22 @@ export function TrackingMap({ couriers }: { couriers: Partial<Record<keyof typeo
         );
       })}
 
-      {pins.map((pin) => (
-        <g key={pin.store} style={{ filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18))' }}>
-          <image
-            href={stores[pin.store].logo}
-            x={pin.x}
-            y={pin.y}
-            width="34"
-            height="34"
-            clipPath={`url(#pin-${pin.store})`}
-            preserveAspectRatio="xMidYMid slice"
-          />
-        </g>
-      ))}
+      {trips.map(({ store }) => {
+        const [x, y] = places[store].pin;
+        return (
+          <g key={store} style={{ filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18))' }}>
+            <image
+              href={stores[store].logo}
+              x={x}
+              y={y}
+              width="34"
+              height="34"
+              clipPath={`url(#pin-${store})`}
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </g>
+        );
+      })}
 
       <g style={{ filter: 'drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2))' }}>
         <circle cx="235" cy="231" r="13" fill="var(--bg-dark-pill)" />

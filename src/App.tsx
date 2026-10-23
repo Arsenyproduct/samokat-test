@@ -9,6 +9,9 @@ import { ProductSheet } from './screens/Product';
 import { Cart } from './screens/Cart';
 import { Checkout } from './screens/Checkout';
 import { Tracking } from './screens/Tracking';
+import { EditOrder } from './screens/EditOrder';
+import { EditItems } from './screens/EditItems';
+import { CancelBlocked, Cancelled } from './screens/OrderResult';
 import s from './App.module.css';
 
 const DEVICE_W = 390;
@@ -36,6 +39,16 @@ function Screens() {
       return <Checkout key={key} />;
     case 'tracking':
       return <Tracking key={key} />;
+    case 'edit':
+      return <EditOrder key={key} />;
+    case 'cancel':
+      return <EditOrder key={key} cancelOpen />;
+    case 'edit-items':
+      return <EditItems key={key} />;
+    case 'cancel-blocked':
+      return <CancelBlocked key={key} />;
+    case 'cancelled':
+      return <Cancelled key={key} />;
   }
 }
 

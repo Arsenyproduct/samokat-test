@@ -37,6 +37,8 @@ export type TrackRow = {
   chip?: TrackChip;
   /** Progress bar share at the start of tracking and at the moment of the delay. */
   progress: [number, number];
+  /** Sheet title once this row is at the door (frame 2.6), until everything arrives. */
+  doorTitle?: string;
 };
 
 export type Scenario = {
@@ -106,6 +108,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       rows: [
         {
           id: 'eapteka',
+          doorTitle: 'еАптека у двери',
           stores: ['eapteka'],
           logo: 'eapteka',
           time: '14:26',
@@ -115,6 +118,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'samokat',
+          doorTitle: 'Самокат у двери',
           stores: ['samokat'],
           logo: 'samokat',
           time: '14:31',
@@ -124,6 +128,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'evening',
+          doorTitle: 'Шоколадница с зоомагазином у двери',
           stores: shokoladnitsaAnd4lapy,
           logo: 'shokoladnitsa',
           time: '15:20',
@@ -132,6 +137,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'lenta',
+          doorTitle: 'Лента у двери',
           stores: ['lenta'],
           logo: 'lenta',
           time: '17:30',
@@ -144,7 +150,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       splitRowId: 'evening',
       joinRowId: 'lenta',
       rowUpdates: {
-        evening: { stores: ['shokoladnitsa'], status: 'Готовим' },
+        evening: { stores: ['shokoladnitsa'], status: 'Готовим', doorTitle: 'Шоколадница у двери' },
       },
       tripsAfterMerge: 3,
     },
@@ -169,6 +175,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       rows: [
         {
           id: 'first',
+          doorTitle: 'Самокат с аптекой у двери',
           stores: ['eapteka', 'samokat'],
           logo: 'samokat',
           time: '14:31',
@@ -178,6 +185,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'evening',
+          doorTitle: 'Шоколадница с зоомагазином у двери',
           stores: shokoladnitsaAnd4lapy,
           logo: 'shokoladnitsa',
           time: '15:20',
@@ -186,6 +194,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'lenta',
+          doorTitle: 'Лента у двери',
           stores: ['lenta'],
           logo: 'lenta',
           time: '17:30',
@@ -199,7 +208,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       joinRowId: 'lenta',
       rowUpdates: {
         first: { status: 'Курьер в пути' },
-        evening: { stores: ['shokoladnitsa'], status: 'Готовим' },
+        evening: { stores: ['shokoladnitsa'], status: 'Готовим', doorTitle: 'Шоколадница у двери' },
       },
       tripsAfterMerge: 2,
     },
@@ -238,6 +247,71 @@ export const trackingCopy = {
   delivered: 'Заказ у двери',
   /** Sheet title once every row has arrived. */
   allDelivered: 'Весь заказ у двери',
+  /** One button under the trips while some store has not started assembling (frame 2.4). */
+  editOrder: 'Изменить заказ',
+};
+
+/**
+ * How long after payment a store can still be changed, in tracking time:
+ * the first 10 s Шоколадница (with 4 лапы) and Лента, the next 10 s only Лента,
+ * then nothing and the button disappears.
+ */
+export const editWindowMs = {
+  shokoladnitsa: 10_000,
+  '4lapy': 10_000,
+  lenta: 20_000,
+} satisfies Partial<Record<StoreId, number>>;
+
+/** Frames 4.1–4.4: change or cancel the order while a store has not started assembling. */
+export const editCopy = {
+  title: 'Изменить заказ',
+  subtitle: 'Правки возможны, пока магазин не начал собирать свою часть.',
+  actions: {
+    add: { title: 'Добавить товар', note: 'Откроется каталог. Товар уйдёт в магазин, который ещё не собрал заказ.' },
+    remove: { title: 'Убрать товар', note: 'Деньги за него вернём на карту.' },
+    amount: { title: 'Изменить количество', note: 'Больше или меньше, пока магазин не начал сборку.' },
+    cancel: { title: 'Отменить заказ', note: 'Только пока курьер не начал собирать. Потом отмена недоступна.' },
+  },
+  statusTitle: 'Что ещё можно менять',
+  can: 'Можно',
+  cannot: 'Нельзя',
+  storeStatus: {
+    waiting: 'Ещё не взяли в сборку',
+    onTheWay: 'Курьер уже в пути',
+    assembling: 'Собирают заказ',
+    atDoor: 'Заказ у двери',
+  },
+  items: {
+    title: 'Состав заказа',
+    subtitle: 'Меняйте только то, что ещё не собрано.',
+    canEdit: 'Можно изменить',
+    locked: 'Уже собирают',
+    lockedNote: (names: string) => `${names} уже в сборке или в пути. Изменить их нельзя, добавьте нужное в следующий рейс.`,
+    refund: 'Вернём за убранное',
+    refundValue: (value: string) => `+ ${value} на карту`,
+    save: 'Сохранить изменения',
+    pieces: (count: number) => `${count} шт`,
+  },
+  cancel: {
+    title: 'Отменить весь заказ?',
+    text: 'Вернём всю сумму на карту. Промокод и бонусы вернутся на ваш счёт.',
+    stores: 'Отменим сразу во всех магазинах',
+    confirm: 'Отменить заказ',
+    keep: 'Оставить заказ',
+  },
+  blocked: {
+    title: 'Заказ уже собирают',
+    text: 'Отменить его целиком нельзя: курьер начал сборку. Можно добавить товары в следующий рейс или написать в поддержку.',
+    support: 'Написать в поддержку',
+    supportNote: 'Чат поддержки в прототип не входит',
+    back: 'Вернуться к заказу',
+  },
+  /** After a successful cancel; reuses the wording of frame 4.3. */
+  cancelled: {
+    title: 'Заказ отменён',
+    text: 'Вернём всю сумму на карту. Промокод и бонусы вернутся на ваш счёт.',
+    home: 'На главную',
+  },
 };
 
 /** The delay event on the tracking screen (frame 2.5). */
@@ -255,12 +329,14 @@ export const delayCopy = {
     stores: ['4lapy'],
     logo: '4lapy',
     time: '17:10',
-    status: 'Нет игрушки на складе',
+    status: 'На складе нет игрушки',
+    doorTitle: '4 лапы у двери',
     chip: { kind: 'static', text: 'задержка', tone: 'amber' },
     progress: [px(16), px(16)],
   } satisfies TrackRow,
   /** After «Объединить» 4 лапы rides with Лента. */
   mergedStatus: 'Ждёт отправки',
+  mergedDoorTitle: '4 лапы и Лента у двери',
 };
 
 /** Product delivered by a store must be in the cart for the store to show up anywhere. */

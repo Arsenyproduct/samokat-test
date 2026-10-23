@@ -80,6 +80,12 @@ const shapes = {
   },
   swap: { box: 22, d: ['M6.42 7.33L2.75 11L6.42 14.67M15.58 7.33L19.25 11L15.58 14.67'] },
   warn: { box: 20, d: ['M10 3.33L2.5 16.67H17.5L10 3.33Z', 'M10 8.33V11.67M10 14.17H10.01'] },
+  sliders: { box: 24, d: ['M6 8H18M6 16H18M10 5V11M14 13V19'] },
+  /** Thin chevron of the action rows in frame 4.1 (5×10). */
+  chevThin: { box: 12, d: ['M3.5 1L8.5 6L3.5 11'] },
+  /** Back chevron inside the 36 px round back button of frames 4.x. */
+  chevL: { box: 36, d: ['M20.5 13L15.5 18L20.5 23'] },
+  exclaim: { box: 96, d: ['M48 38.5V51.5M48 56.5V57.5'] },
   courier: {
     box: 15,
     d: [

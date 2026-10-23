@@ -69,7 +69,7 @@ export function Spinner({ size = 24, onAccent = false }: { size?: 16 | 24 | 40 |
 /* ---------- Button/Primary, Button/Secondary, Button/Primary loading ---------- */
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'dark';
+  variant?: 'primary' | 'secondary' | 'muted' | 'dark';
   loading?: boolean;
   height?: 52 | 56;
 };
@@ -83,6 +83,7 @@ export function Button({ variant = 'primary', loading = false, height = 56, clas
         s.button,
         variant === 'primary' && s.primary,
         variant === 'secondary' && s.secondary,
+        variant === 'muted' && s.buttonMuted,
         variant === 'dark' && s.buttonDark,
         loading && s.buttonLoading,
         className,

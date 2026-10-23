@@ -9,7 +9,12 @@ export type Route =
   | { name: 'product'; id: ProductId }
   | { name: 'cart' }
   | { name: 'checkout' }
-  | { name: 'tracking' };
+  | { name: 'tracking' }
+  | { name: 'edit' }
+  | { name: 'edit-items' }
+  | { name: 'cancel' }
+  | { name: 'cancel-blocked' }
+  | { name: 'cancelled' };
 
 const productIds: ProductId[] = ['milk', 'ice', 'cookie', 'nurofen', 'toy', 'combo', 'buckwheat'];
 
@@ -26,6 +31,11 @@ export function parseHash(hash: string): Route {
     case 'cart':
     case 'checkout':
     case 'tracking':
+    case 'edit':
+    case 'edit-items':
+    case 'cancel':
+    case 'cancel-blocked':
+    case 'cancelled':
       return { name };
     case 'product':
       return productIds.includes(id as ProductId) ? { name: 'product', id: id as ProductId } : { name: 'collection' };
@@ -47,6 +57,12 @@ function parentOf(route: Route): Route {
       return { name: 'collection' };
     case 'checkout':
       return { name: 'cart' };
+    case 'edit':
+    case 'cancel-blocked':
+      return { name: 'tracking' };
+    case 'edit-items':
+    case 'cancel':
+      return { name: 'edit' };
     default:
       return { name: 'home' };
   }
@@ -62,6 +78,8 @@ type Router = {
   direction: 'forward' | 'back';
   navigate: (to: Route, options?: { replace?: boolean }) => void;
   back: () => void;
+  /** Goes `steps` screens back at once, or to `fallback` when opened by a link. */
+  backTo: (steps: number, fallback: Route) => void;
 };
 
 const RouterContext = createContext<Router | null>(null);
@@ -109,7 +127,18 @@ export function RouterProvider({ children }: { children: ReactNode }) {
     setRoute(parent);
   }, []);
 
-  const value = useMemo(() => ({ route, direction, navigate, back }), [route, direction, navigate, back]);
+  const backTo = useCallback<Router['backTo']>((steps, fallback) => {
+    if (readDepth() >= steps) {
+      window.history.go(-steps);
+      return;
+    }
+    window.history.replaceState({ depth: 0 } satisfies HistoryState, '', routeToHash(fallback));
+    depthRef.current = 0;
+    setDirection('back');
+    setRoute(fallback);
+  }, []);
+
+  const value = useMemo(() => ({ route, direction, navigate, back, backTo }), [route, direction, navigate, back, backTo]);
   return <RouterContext.Provider value={value}>{children}</RouterContext.Provider>;
 }
 
