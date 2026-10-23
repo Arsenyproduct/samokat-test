@@ -24,7 +24,7 @@ export const stores: Record<StoreId, Store> = {
   samokat: {
     id: 'samokat',
     name: 'Самокат',
-    logo: asset('logos/samokat.svg'),
+    logo: asset('logos/samokat.png'),
     color: 'var(--store-samokat)',
   },
   eapteka: {
