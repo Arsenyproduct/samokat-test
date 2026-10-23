@@ -124,10 +124,10 @@ export function Tracking() {
   useFlip(sheetRef, `${loading}-${delayed}-${decision}`);
 
   // Each courier drives from its store to home together with its row.
-  const couriers: Partial<Record<Exclude<StoreId, 'shokoladnitsa'>, number>> = {};
+  const couriers: Partial<Record<Exclude<StoreId, 'eapteka'>, number>> = {};
   for (const row of rows) {
     for (const store of row.stores) {
-      if (store !== 'shokoladnitsa') couriers[store] = 0.5 + 0.5 * shareOf(row, elapsed);
+      if (store !== 'eapteka') couriers[store] = 0.5 + 0.5 * shareOf(row, elapsed);
     }
   }
 

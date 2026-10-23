@@ -6,15 +6,15 @@ import { stores, type StoreId } from '../data/catalog';
 type Point = [number, number];
 
 /** Route polylines from the store pin to home, in frame coordinates. */
-const routes: Record<Exclude<StoreId, 'shokoladnitsa'>, Point[]> = {
-  eapteka: [[79, 57], [79, 225], [235, 225]],
+const routes: Record<Exclude<StoreId, 'eapteka'>, Point[]> = {
+  shokoladnitsa: [[79, 57], [79, 225], [235, 225]],
   samokat: [[313, 115], [235, 115], [235, 231]],
   '4lapy': [[157, 289], [157, 237], [235, 237]],
   lenta: [[313, 289], [313, 231], [235, 231]],
 };
 
 const pins: { store: StoreId; x: number; y: number }[] = [
-  { store: 'eapteka', x: 62, y: 40 },
+  { store: 'shokoladnitsa', x: 62, y: 40 },
   { store: 'samokat', x: 296, y: 98 },
   { store: '4lapy', x: 140, y: 272 },
   { store: 'lenta', x: 296, y: 272 },
