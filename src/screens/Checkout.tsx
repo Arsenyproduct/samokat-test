@@ -58,6 +58,9 @@ export function Checkout() {
   const trips = buildTrips(scenario, cart);
   const delivery = single ? 0 : current.delivery;
   const total = cartTotal + delivery;
+  // When Самокат arrives; without Самокат in the order, when everything arrives.
+  const samokatTrip = trips.find((trip) => trip.stores.includes('samokat'));
+  const keyTime = samokatTrip?.time ?? latestTime(trips);
 
   useFlip(tripsRef, loading ? 'loading' : scenario);
 
@@ -85,19 +88,19 @@ export function Checkout() {
               <p className={`t-body-s ${s.muted}`}>{checkoutCopy.hint}</p>
               <DeliverySlider value={scenario} onChange={setScenario} />
               <div className={s.stats} aria-live="polite">
-                <div className={s.stat}>
+                <div className={`${s.stat} ${s.statFill}`}>
                   <span key={trips.length} className={`t-num-20 ${s.statValue}`}>
                     {trips.length}
                   </span>
                   <span className={`t-caption ${s.muted}`}>{checkoutCopy.arrivalsLabel(trips.length)}</span>
                 </div>
-                <div className={s.stat}>
-                  <span key={latestTime(trips)} className={`t-num-20 ${s.statValue}`}>
-                    {latestTime(trips)}
+                <div className={`${s.stat} ${s.statHug}`}>
+                  <span key={keyTime} className={`t-num-20 ${s.statValue}`}>
+                    {keyTime}
                   </span>
-                  <span className={`t-caption ${s.muted}`}>{checkoutCopy.lastLabel}</span>
+                  <span className={`t-caption ${s.muted}`}>{samokatTrip ? checkoutCopy.samokatLabel : checkoutCopy.lastLabel}</span>
                 </div>
-                <div className={s.stat}>
+                <div className={`${s.stat} ${s.statPrice}`}>
                   <span key={delivery} className={`t-num-20 ${s.statValue}`}>
                     {formatPrice(delivery)}
                   </span>

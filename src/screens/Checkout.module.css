@@ -27,7 +27,6 @@
   gap: var(--space-8);
 }
 .stat {
-  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -35,6 +34,17 @@
   border-radius: var(--radius-chip);
   background: var(--bg-page);
   white-space: nowrap;
+}
+/* Number of deliveries fills the rest, Самокат time hugs its text, the price is 98 px */
+.statFill {
+  flex: 1 1 0;
+}
+.statHug {
+  flex: none;
+}
+.statPrice {
+  flex: none;
+  width: 98px;
 }
 .statValue {
   animation: fade-in var(--dur-base) var(--ease-out);

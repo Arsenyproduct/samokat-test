@@ -151,6 +151,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expect(slider).toHaveAttribute('aria-valuetext', 'Скорее');
   await expect(page.getByText('доставки', { exact: true })).toBeVisible();
   await expect(page.getByText('за доставку', { exact: true })).toBeVisible();
+  await expect(page.getByText('приедет Самокат', { exact: true })).toBeVisible();
   await expect(page.getByText(price('2 264'))).toBeVisible();
   await shot('checkout-fast');
 

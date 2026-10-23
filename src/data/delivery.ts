@@ -73,6 +73,8 @@ export const checkoutCopy = {
   hint: 'Двигайте ползунок, рейсы и цена пересоберутся.',
   arrivalsLabel: (count: number) => pluralArrivals(count),
   lastLabel: 'всё доедет',
+  /** Самокат is the priority: the middle chip shows when it arrives. */
+  samokatLabel: 'приедет Самокат',
   deliveryLabel: 'за доставку',
   promoNote: 'Один промокод на все товары, включая партнёров',
   bonusNote: '154 бонуса, списываем на весь заказ',
