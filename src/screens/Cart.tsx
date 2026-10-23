@@ -126,7 +126,7 @@ export function Cart() {
 
           <div className={`${s.card} ${s.total}`}>
             <p className={`t-body-m ${s.muted}`}>{store.useBonus && !empty ? cartCopy.totalWithBonus : cartCopy.total}</p>
-            <p className={`t-price-xl ${s.totalValue}`}>{formatPrice(store.cartTotal)}</p>
+            <p className="t-price-xl">{formatPrice(store.cartTotal)}</p>
             {empty ? (
               <Button onClick={() => navigate({ name: 'catalog' })}>{cartCopy.emptyCta}</Button>
             ) : (

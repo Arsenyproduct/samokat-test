@@ -166,7 +166,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         id: 'first',
         time: '14:31',
         stores: ['eapteka', 'samokat'],
-        note: { text: 'аптека едет с Самокатом', requires: ['eapteka', 'samokat'] },
+        note: { text: 'Аптека едет с Самокатом', requires: ['eapteka', 'samokat'] },
       },
       { id: 'evening', time: '15:20', stores: shokoladnitsaAnd4lapy },
       { id: 'lenta', time: '17:30', stores: ['lenta'] },

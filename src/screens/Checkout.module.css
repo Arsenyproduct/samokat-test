@@ -117,6 +117,3 @@
   padding: var(--space-18) var(--space-16);
   text-align: center;
 }
-.totalValue {
-  font-variant-numeric: tabular-nums;
-}

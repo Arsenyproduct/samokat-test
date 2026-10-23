@@ -142,7 +142,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expectSkeletonThenContent(page);
   const slider = page.getByRole('slider', { name: 'Как привезти' });
   await expect(slider).toHaveAttribute('aria-valuetext', 'Стандарт');
-  await expect(page.getByText('аптека едет с Самокатом')).toBeVisible();
+  await expect(page.getByText('Аптека едет с Самокатом')).toBeVisible();
   await expect(page.getByText(price('2 164'))).toBeVisible();
   await shot('checkout-balance');
 

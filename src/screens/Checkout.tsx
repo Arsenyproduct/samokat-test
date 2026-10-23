@@ -118,7 +118,7 @@ export function Checkout() {
 
           <section className={`${s.card} ${s.total}`}>
             <p className={`t-body-m ${s.muted}`}>{checkoutCopy.total}</p>
-            <p className={`t-price-xl ${s.totalValue}`}>{formatPrice(total)}</p>
+            <p className="t-price-xl">{formatPrice(total)}</p>
             <Button loading={paying} onClick={() => setPaying(true)}>
               {checkoutCopy.pay}
             </Button>

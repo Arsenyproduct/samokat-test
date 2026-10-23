@@ -154,9 +154,6 @@
   align-items: center;
   text-align: center;
 }
-.totalValue {
-  font-variant-numeric: tabular-nums;
-}
 .footnote {
   color: var(--text-secondary);
 }
