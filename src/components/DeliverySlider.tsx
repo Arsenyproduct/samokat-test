@@ -6,14 +6,12 @@ import s from './DeliverySlider.module.css';
 type Props = {
   value: ScenarioId;
   /** Called as soon as the nearest stop changes, also while dragging. */
-  onChange?: (value: ScenarioId) => void;
-  /** Read-only copy of the slider (delay card on tracking). */
-  readOnly?: boolean;
+  onChange: (value: ScenarioId) => void;
 };
 
 const last = scenarioOrder.length - 1;
 
-export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
+export function DeliverySlider({ value, onChange }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const index = scenarioOrder.indexOf(value);
   const [drag, setDrag] = useState<number | null>(null);
@@ -22,7 +20,7 @@ export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
   const pick = (next: number) => {
     const clamped = Math.max(0, Math.min(last, next));
     const id = scenarioOrder[clamped];
-    if (id && id !== value) onChange?.(id);
+    if (id && id !== value) onChange(id);
   };
 
   // The device can be scaled on desktop, so convert from screen to slider units.
@@ -36,7 +34,6 @@ export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
   };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (readOnly) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     const p = positionAt(event.clientX);
     setDrag(p);
@@ -57,7 +54,6 @@ export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (readOnly) return;
     const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[event.key];
     if (step !== undefined) {
       event.preventDefault();
@@ -68,7 +64,7 @@ export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
     }
   };
 
-  const className = [s.slider, drag === null && s.animated, drag !== null && s.dragging, readOnly && s.static]
+  const className = [s.slider, drag === null && s.animated, drag !== null && s.dragging]
     .filter(Boolean)
     .join(' ');
 
@@ -78,14 +74,12 @@ export function DeliverySlider({ value, onChange, readOnly = false }: Props) {
       className={className}
       style={{ '--p': position } as CSSProperties}
       role="slider"
-      tabIndex={readOnly ? -1 : 0}
+      tabIndex={0}
       aria-label="Как привезти"
       aria-valuemin={0}
       aria-valuemax={last}
       aria-valuenow={index}
       aria-valuetext={scenarios[value].label}
-      aria-readonly={readOnly || undefined}
-      aria-hidden={readOnly || undefined}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerEnd}

@@ -95,12 +95,6 @@
   font-weight: 700;
   color: var(--text-primary);
 }
-.static .label {
-  color: var(--text-primary);
-}
-.static {
-  cursor: default;
-}
 
 .label0 {
   left: 0;

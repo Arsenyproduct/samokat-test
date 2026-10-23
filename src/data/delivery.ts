@@ -245,9 +245,9 @@ export const delayCopy = {
   afterMs: 6000,
   title: '4 лапы задерживаются',
   subtitle: 'Новый срок доставки 17:10, Лента приедет в 17:30.',
-  proposalTitle: 'Сдвинуть ползунок?',
+  proposalTitle: 'Объединить рейсы?',
   proposalText: (tripsLeft: number) =>
-    `Если привезти игрушку вместе с Лентой в 17:30, останется ${tripsLeft} ${pluralArrivals(tripsLeft)}, а доставка станет дешевле на 50 ₽.`,
+    `4 лапы задерживаются и привезут игрушку только в 17:10. Можно объединить её с Лентой: всё приедет в 17:30, останется ${tripsLeft} ${pluralArrivals(tripsLeft)}, а доставка станет дешевле на 50 ₽.`,
   merge: 'Объединить',
   keep: 'Оставить',
   delayedRow: {

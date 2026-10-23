@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { stores, type StoreId } from '../data/catalog';
 import { delayCopy, scenarios, trackingCopy, type TrackRow } from '../data/delivery';
-import { DeliverySlider } from '../components/DeliverySlider';
 import { Icon } from '../components/Icon';
 import { TrackingMap } from '../components/TrackingMap';
 import { Button, Grabber, Skeleton, StatusBar, StoreLogo, useEnterLoading } from '../components/ui';
@@ -169,7 +168,6 @@ export function Tracking() {
                 <span className="t-h3">{delayCopy.proposalTitle}</span>
               </p>
               <p className="t-body-s">{delayCopy.proposalText(delay.tripsAfterMerge)}</p>
-              <DeliverySlider value={scenario.id} readOnly />
               <div className={s.actions}>
                 <Button height={52} onClick={() => setDecision('merged')}>
                   {delayCopy.merge}
