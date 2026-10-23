@@ -1,7 +1,7 @@
 import { stores } from '../data/catalog';
 import { editCopy } from '../data/delivery';
 import { Icon, type IconName } from '../components/Icon';
-import { Button, StatusBar, StoreLogo } from '../components/ui';
+import { Button, RoundButton, StatusBar, StoreLogo } from '../components/ui';
 import { useRouter, type Route } from '../state/router';
 import { storeStates, useOrderTracking } from '../state/tracking';
 import { Screen, screenStyles } from './Screen';
@@ -10,9 +10,7 @@ import s from './EditOrder.module.css';
 export function BackButton() {
   const { back } = useRouter();
   return (
-    <button type="button" className={s.back} aria-label="Назад" onClick={back}>
-      <Icon name="chevL" size={36} stroke={2} />
-    </button>
+<RoundButton icon="chevL" label="Назад" onClick={back} />
   );
 }
 

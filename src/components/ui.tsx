@@ -49,6 +49,16 @@ export function IconButton({ icon, label, iconSize = 22, className, ...rest }: I
   );
 }
 
+/* ---------- Round button pinned to the top left (36 px, white, soft shadow) ---------- */
+
+export function RoundButton({ icon, label, onClick }: { icon: IconName; label: string; onClick: () => void }) {
+  return (
+    <button type="button" className={s.roundButton} aria-label={label} onClick={onClick}>
+      <Icon name={icon} size={icon === 'chevL' ? 36 : 20} stroke={2} />
+    </button>
+  );
+}
+
 /* ---------- Loader/Spinner ---------- */
 
 export function Spinner({ size = 24, onAccent = false }: { size?: 16 | 24 | 40 | 21; onAccent?: boolean }) {

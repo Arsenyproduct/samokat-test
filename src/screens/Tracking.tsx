@@ -3,7 +3,7 @@ import { stores, type StoreId } from '../data/catalog';
 import { delayCopy, trackingCopy, type TrackRow } from '../data/delivery';
 import { Icon } from '../components/Icon';
 import { TrackingMap, type MapTrip } from '../components/TrackingMap';
-import { Button, Grabber, Skeleton, StatusBar, StoreLogo, useEnterLoading } from '../components/ui';
+import { Button, Grabber, RoundButton, Skeleton, StatusBar, StoreLogo, useEnterLoading } from '../components/ui';
 import { useFlip } from '../components/useFlip';
 import { useRouter } from '../state/router';
 import { useStore } from '../state/store';
@@ -171,6 +171,7 @@ export function Tracking() {
         </div>
       </div>
       <StatusBar tone="dark" />
+      {allDelivered && <RoundButton icon="close" label="Закрыть" onClick={() => navigate({ name: 'home' })} />}
     </Screen>
   );
 }

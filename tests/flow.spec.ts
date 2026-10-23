@@ -215,6 +215,10 @@ test('delay proposal can be dismissed with «Оставить»', async ({ page 
   await expect(page.getByRole('button', { name: 'Оставить' })).toHaveCount(0);
   await expect(page.getByText('задержка', { exact: true })).toBeVisible();
   await expect(page.getByText('Заказ у двери', { exact: true })).toHaveCount(3, { timeout: 40_000 });
+  // When everything is at the door, a close button leads home
+  await page.getByRole('button', { name: 'Закрыть' }).click();
+  await expect(page.getByText('Ооооострова с призами')).toBeVisible();
+  await page.goBack();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `tests/screenshots/${testInfo.project.name}/17-delay-kept.png` });
   expect(problems, problems.join('\n')).toEqual([]);
