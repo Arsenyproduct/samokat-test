@@ -1,0 +1,144 @@
+/* 2.4 Трекинг при «Баланс» (378:351) and 2.5 Задержка (378:408) */
+
+.map {
+  position: relative;
+  height: 380px;
+  overflow: hidden;
+}
+
+.map :global(.tracking-courier) {
+  transition: transform 1s linear;
+}
+
+.sheet {
+  position: relative;
+  margin-top: -40px;
+  min-height: calc(100% - 340px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-24) var(--space-12) calc(24px + var(--safe-bottom));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--bg-page);
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-6);
+}
+.headText {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}
+.muted {
+  color: var(--text-secondary);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+}
+.rowNew {
+  animation: rise-in var(--dur-slow) var(--ease-out) both;
+}
+.rowHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+}
+.rowStore {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.rowStore span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rowStatus {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  white-space: nowrap;
+}
+.chip {
+  padding: var(--space-2) var(--space-8);
+  border-radius: var(--radius-pill);
+  font: 700 12px/16px var(--font);
+  color: var(--text-primary);
+}
+.green {
+  background: var(--state-green-tint);
+}
+.amber {
+  background: var(--state-amber-tint);
+}
+
+.track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-page);
+  overflow: hidden;
+}
+.progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 6px;
+  min-width: 6px;
+  border-radius: 3px;
+  transition: width 1s linear;
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-10);
+  padding: var(--space-14) var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+}
+
+/* Delay proposal (378:432) */
+.proposal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding: var(--space-16);
+  border: 2px solid var(--state-amber);
+  border-radius: var(--radius-card);
+  background: var(--bg-card);
+  animation: rise-in var(--dur-slow) var(--ease-out) both;
+}
+.proposalHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+.warn {
+  color: var(--state-amber);
+}
+.actions {
+  display: flex;
+  gap: var(--space-10);
+}
+.actions > button {
+  flex: 1;
+  min-width: 0;
+}

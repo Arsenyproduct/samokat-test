@@ -8,6 +8,7 @@ import { Collection } from './screens/Collection';
 import { ProductSheet } from './screens/Product';
 import { Cart } from './screens/Cart';
 import { Checkout } from './screens/Checkout';
+import { Tracking } from './screens/Tracking';
 import s from './App.module.css';
 
 const DEVICE_W = 390;
@@ -19,8 +20,6 @@ function Screens() {
   // the 300 ms skeletons run each time a screen opens.
   const key = routeToHash(route);
   switch (route.name) {
-    default:
-      return <Home key={key} />;
     case 'home':
       return <Home key={key} />;
     case 'story':
@@ -35,6 +34,8 @@ function Screens() {
       return <Cart key={key} />;
     case 'checkout':
       return <Checkout key={key} />;
+    case 'tracking':
+      return <Tracking key={key} />;
   }
 }
 
