@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { formatPrice, products, type ProductId } from '../data/catalog';
 import { Icon } from '../components/Icon';
 import { IconButton, PartnerTag, StatusBar } from '../components/ui';
+import { useSwipeDown } from '../components/useSwipeDown';
 import { useRouter } from '../state/router';
 import { useStore } from '../state/store';
 import { Screen, screenStyles } from './Screen';
@@ -12,12 +14,15 @@ export function ProductSheet({ id }: { id: ProductId }) {
   const { cart, add, remove, favorites, toggleFavorite } = useStore();
   const count = cart[id] ?? 0;
   const favorite = favorites.includes(id);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useSwipeDown(sheetRef, bodyRef, back);
 
   return (
     <Screen label={product.title} className={screenStyles.overlay} animate={false}>
       <StatusBar tone="light" />
-      <div className={`${s.sheet} ${screenStyles.sheetEnter}`}>
-        <div className={s.body}>
+      <div className={`${s.sheet} ${screenStyles.sheetEnter}`} ref={sheetRef}>
+        <div className={s.body} ref={bodyRef}>
           <div className={s.photo}>
             <img src={product.image} alt="" />
             <div className={s.actions}>

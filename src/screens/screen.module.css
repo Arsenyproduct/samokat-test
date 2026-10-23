@@ -53,7 +53,8 @@
   background: var(--bg-overlay);
 }
 .sheetEnter {
-  animation: sheet-in var(--dur-slow) var(--ease-out) both;
+  /* backwards, not both: after entering, the swipe-down gesture owns the transform */
+  animation: sheet-in var(--dur-slow) var(--ease-out) backwards;
 }
 
 /* Fade for content replacing a skeleton */

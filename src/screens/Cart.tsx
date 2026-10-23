@@ -1,7 +1,9 @@
+import { useRef } from 'react';
 import { cartCopy, cartOrder, formatPrice, partnerOrder, products, stores, type ProductId, type StoreId } from '../data/catalog';
 import { Icon } from '../components/Icon';
 import { OrderSettings } from '../components/OrderSettings';
 import { Button, Divider, Grabber, Skeleton, StatusBar, Stepper, StoreLogo, Toggle, useEnterLoading } from '../components/ui';
+import { useSwipeDown } from '../components/useSwipeDown';
 import { useRouter } from '../state/router';
 import { useStore } from '../state/store';
 import { Screen, screenStyles } from './Screen';
@@ -41,6 +43,8 @@ export function Cart() {
   const { navigate, back } = useRouter();
   const store = useStore();
   const loading = useEnterLoading();
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useSwipeDown(sheetRef, sheetRef, back);
 
   const idsOf = (storeId: StoreId) => cartOrder.filter((id) => products[id].store === storeId && (store.cart[id] ?? 0) > 0);
   const rows = (ids: ProductId[]) =>
@@ -55,7 +59,7 @@ export function Cart() {
       <StatusBar tone="light" />
       <button type="button" className={s.dismiss} aria-label="Закрыть корзину" onClick={back} />
 
-      <div className={`${s.sheet} ${screenStyles.sheetEnter}`}>
+      <div className={`${s.sheet} ${screenStyles.sheetEnter}`} ref={sheetRef}>
         <div className={s.content} aria-busy={loading}>
           <Grabber top={6} onClose={back} />
 
