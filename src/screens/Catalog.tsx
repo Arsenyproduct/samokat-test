@@ -1,4 +1,6 @@
-import { images, products, type StoreId } from '../data/catalog';
+import { images, products, type ProductId, type StoreId } from '../data/catalog';
+import { Icon } from '../components/Icon';
+import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { IconButton, Skeleton, StatusBar, StoreLogo, useEnterLoading } from '../components/ui';
 import { useRouter } from '../state/router';
 import { Screen, screenStyles } from './Screen';
@@ -12,6 +14,8 @@ const own: Tile[] = [
   { label: 'Товары', image: images.bar },
   { label: 'Часто заказывают', image: products.ice.image, tight: true },
 ];
+
+const evening: ProductId[] = ['nurofen', 'buckwheat', 'ice'];
 
 const partners: Tile[] = [
   { label: 'Аптеки', image: products.nurofen.image, logo: 'eapteka' },
@@ -50,6 +54,22 @@ export function Catalog() {
         </div>
 
         <div className={s.content}>
+          <button type="button" className={s.sectionLink} onClick={() => navigate({ name: 'collection' })}>
+            <h2 className="t-h1">Подборка на вечер</h2>
+            <Icon name="chevR" size={20} className={s.sectionChev} />
+          </button>
+          <div className={s.products} aria-busy={loading}>
+            {evening.map((id) =>
+              loading ? (
+                <ProductCardSkeleton key={id} compact />
+              ) : (
+                <div key={id} className={screenStyles.reveal}>
+                  <ProductCard id={id} compact onOpen={() => navigate({ name: 'product', id })} />
+                </div>
+              ),
+            )}
+          </div>
+
           <h2 className="t-h1">От Самоката</h2>
           <div className={s.grid}>{renderTiles(own)}</div>
 

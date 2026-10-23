@@ -89,3 +89,18 @@ button.photo:active {
   aspect-ratio: 1;
   height: auto !important;
 }
+
+/* Three in a row (catalog): the photo follows the column width, the text stays 2 + 1 lines */
+.compact {
+  height: auto;
+}
+.skeleton.compact {
+  gap: var(--space-6);
+}
+/* Same 101 px as title + amount + chip with their gaps */
+.skeletonText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  height: 95px;
+}

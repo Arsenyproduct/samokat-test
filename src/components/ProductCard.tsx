@@ -4,7 +4,8 @@ import { Icon } from './Icon';
 import { PartnerTag, PriceChip, Skeleton } from './ui';
 import s from './ProductCard.module.css';
 
-export function ProductCard({ id, onOpen }: { id: ProductId; onOpen?: () => void }) {
+/** Product card (360:150). `compact` is the three-in-a-row version for the catalog. */
+export function ProductCard({ id, onOpen, compact = false }: { id: ProductId; onOpen?: () => void; compact?: boolean }) {
   const product = products[id];
   const { cart, add, remove, favorites, toggleFavorite } = useStore();
   const count = cart[id] ?? 0;
@@ -13,7 +14,7 @@ export function ProductCard({ id, onOpen }: { id: ProductId; onOpen?: () => void
   const photo = <img src={product.image} alt="" draggable={false} />;
 
   return (
-    <article className={s.card} aria-label={product.title}>
+    <article className={`${s.card} ${compact ? s.compact : ''}`} aria-label={product.title}>
       <div className={s.photoWrap}>
         {onOpen ? (
           <button type="button" className={s.photo} onClick={onOpen} aria-label={`Открыть: ${product.title}`}>
@@ -57,7 +58,19 @@ export function ProductCard({ id, onOpen }: { id: ProductId; onOpen?: () => void
   );
 }
 
-export function ProductCardSkeleton() {
+export function ProductCardSkeleton({ compact = false }: { compact?: boolean }) {
+  if (compact) {
+    return (
+      <div className={`${s.skeleton} ${s.compact}`} aria-hidden="true">
+        <Skeleton width="100%" height={0} radius={20} className={s.skeletonPhoto} />
+        <div className={s.skeletonText}>
+          <Skeleton width="90%" height={12} radius={6} />
+          <Skeleton width="60%" height={12} radius={6} />
+          <Skeleton width={84} height={32} radius={16} style={{ marginTop: 'auto' }} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={s.skeleton} aria-hidden="true">
       <Skeleton width="100%" height={180} radius={24} className={s.skeletonPhoto} />

@@ -100,3 +100,20 @@
   aspect-ratio: 118.447 / 160.7;
   height: auto !important;
 }
+
+/* «Подборка на вечер»: three product cards in a row */
+.sectionLink {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  align-self: flex-start;
+  color: var(--text-primary);
+}
+.sectionChev {
+  color: var(--text-secondary);
+}
+.products {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+}
