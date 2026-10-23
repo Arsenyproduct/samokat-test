@@ -1,0 +1,102 @@
+/* Каталог / Разделы (374:12) */
+
+.screen {
+  background: var(--bg-card);
+}
+
+.header {
+  position: relative;
+  height: 29px;
+  margin-top: calc(var(--statusbar-h) - 2px);
+  display: flex;
+  justify-content: center;
+}
+.back {
+  position: absolute;
+  left: 11px;
+  top: 0;
+  height: 29px;
+}
+.title {
+  margin-top: 2px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  padding: 25px 11px calc(32px + var(--safe-bottom));
+}
+
+.partnersHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.note {
+  max-width: 360px;
+  color: var(--text-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 6.33px;
+  row-gap: 6.3px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 118.447 / 160.7;
+  overflow: hidden;
+  border-radius: var(--radius-chip);
+  background: var(--bg-catalog-tile);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.tile:active {
+  transform: scale(0.97);
+}
+
+.tileImage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46px;
+  bottom: 0;
+  width: 100%;
+  height: calc(100% - 46px);
+  object-fit: contain;
+}
+
+.fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46px;
+  height: 30px;
+  background: linear-gradient(to bottom, var(--bg-catalog-tile), rgba(239, 239, 240, 0));
+}
+
+.tileLabel {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 5px;
+  font: 600 13px/20px var(--font);
+  color: var(--text-primary);
+}
+.tileLabelTight {
+  top: 9px;
+  line-height: 12px;
+}
+
+.tileLogo {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+}
+
+.skeletonTile {
+  aspect-ratio: 118.447 / 160.7;
+  height: auto !important;
+}

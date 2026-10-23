@@ -3,6 +3,7 @@ import { RouterProvider, routeToHash, useRouter } from './state/router';
 import { StoreProvider } from './state/store';
 import { Home } from './screens/Home';
 import { Story } from './screens/Story';
+import { Catalog } from './screens/Catalog';
 import s from './App.module.css';
 
 const DEVICE_W = 390;
@@ -20,6 +21,8 @@ function Screens() {
       return <Home key={key} />;
     case 'story':
       return <Story key={key} />;
+    case 'catalog':
+      return <Catalog key={key} />;
   }
 }
 
