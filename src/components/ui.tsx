@@ -1,4 +1,4 @@
-import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type ButtonHTMLAttributes, type CSSProperties } from 'react';
 import { stores, formatPrice, type StoreId } from '../data/catalog';
 import { Icon, type IconName } from './Icon';
 import s from './ui.module.css';
@@ -203,8 +203,4 @@ export function useEnterLoading(ms = LOADING_MS) {
     return () => window.clearTimeout(timer);
   }, [ms]);
   return loading;
-}
-
-export function Loading({ loading, skeleton, children }: { loading: boolean; skeleton: ReactNode; children: ReactNode }) {
-  return <>{loading ? skeleton : children}</>;
 }
