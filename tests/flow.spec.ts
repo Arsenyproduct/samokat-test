@@ -94,7 +94,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
 
   // 3. Product sheet: еАптека
   await page.getByRole('button', { name: /Открыть: Нурофен/ }).click();
-  await expect(page.getByText('Привезёт еАптека, около 10 минут')).toBeVisible();
+  await expect(page.getByText('Привезёт еАптека, около 20 минут')).toBeVisible();
   await shot('product-eapteka');
   await page.getByRole('button', { name: /Добавить в корзину: Нурофен/ }).click();
   await expect(page.getByRole('button', { name: /Убрать: Нурофен/ })).toBeVisible();

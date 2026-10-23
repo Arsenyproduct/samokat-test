@@ -4,10 +4,10 @@ import { useRouter } from '../state/router';
 import { Screen, screenStyles } from './Screen';
 import s from './Story.module.css';
 
-// Copy from frame 372:130.
+// Copy from frame 372:130, with Самокат first and еАптека at 20 minutes.
 const rows: { value: string; unit: string; title: string; note: string; logo: StoreId }[] = [
-  { value: '10', unit: 'мин', title: 'еАптека', note: 'Лекарства, уход', logo: 'eapteka' },
   { value: '15', unit: 'мин', title: 'Самокат', note: 'Продукты на каждый день', logo: 'samokat' },
+  { value: '20', unit: 'мин', title: 'еАптека', note: 'Лекарства, уход', logo: 'eapteka' },
   { value: '1', unit: 'час', title: 'Шоколадница, 4 лапы', note: 'Готовые блюда и зоотовары', logo: '4lapy' },
   { value: '3+', unit: 'часа', title: 'Лента', note: 'Крупные закупки', logo: 'lenta' },
 ];

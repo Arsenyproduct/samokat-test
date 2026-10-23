@@ -32,7 +32,7 @@ export const stores: Record<StoreId, Store> = {
     name: 'еАптека',
     logo: asset('logos/eapteka.png'),
     color: 'var(--store-eapteka)',
-    cartEta: '~10 минут',
+    cartEta: '~20 минут',
   },
   '4lapy': {
     id: '4lapy',
@@ -119,7 +119,7 @@ export const products: Record<ProductId, Product> = {
     cartTitle: 'Нурофен Экспресс, 200 мг, 20 таблеток',
     amount: '20 шт',
     detail: {
-      delivery: 'Привезёт еАптека, около 10 минут',
+      delivery: 'Привезёт еАптека, около 20 минут',
       note: 'Это партнёрский товар. Срок доставки отличается от Самоката, остальное в заказе приедет как обычно.',
     },
   },
