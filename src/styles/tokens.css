@@ -88,7 +88,8 @@
 .t-body-s { font: 500 13px/17px var(--font); }
 .t-caption { font: 500 12px/16px var(--font); }
 .t-price-l { font: 700 17px/22px var(--font); }
-.t-price-xl { font: 700 36px/40px var(--font); }
+/* At 36 px the spaces in «2 164 ₽» read as gaps, so they are narrowed */
+.t-price-xl { font: 700 36px/40px var(--font); word-spacing: -0.08em; }
 .t-button-l { font: 700 17px/22px var(--font); }
 .t-button-m { font: 700 14px/18px var(--font); }
 
