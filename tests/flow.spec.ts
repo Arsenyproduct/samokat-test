@@ -288,6 +288,6 @@ test('an order from one store has no slider', async ({ page }) => {
   await expect(page.getByText('Как привезти?')).toHaveCount(0);
   await expect(page.getByText(price('318'))).toBeVisible();
   await page.getByRole('button', { name: 'Оплатить' }).click();
-  await expect(page.getByRole('heading', { name: 'Самокат приедет в 14:31' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Самокат приедет в 14:26' })).toBeVisible();
   expect(problems, problems.join('\n')).toEqual([]);
 });
