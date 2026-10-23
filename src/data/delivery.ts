@@ -73,7 +73,7 @@ export const checkoutCopy = {
   hint: 'Двигайте ползунок, рейсы и цена пересоберутся.',
   arrivalsLabel: (count: number) => pluralArrivals(count),
   lastLabel: 'всё доедет',
-  deliveryLabel: 'доставка',
+  deliveryLabel: 'за доставку',
   promoNote: 'Один промокод на все товары, включая партнёров',
   bonusNote: '154 бонуса, списываем на весь заказ',
   total: 'Итого',
@@ -83,9 +83,9 @@ export const checkoutCopy = {
 function pluralArrivals(count: number) {
   const mod10 = count % 10;
   const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return 'приезд';
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'приезда';
-  return 'приездов';
+  if (mod10 === 1 && mod100 !== 11) return 'доставка';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'доставки';
+  return 'доставок';
 }
 
 const shokoladnitsaAnd4lapy: StoreId[] = ['shokoladnitsa', '4lapy'];
@@ -157,7 +157,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
   },
   balance: {
     id: 'balance',
-    label: 'Баланс',
+    label: 'Стандарт',
     delivery: 99,
     trips: [
       {

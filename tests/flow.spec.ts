@@ -137,11 +137,11 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await page.getByRole('button', { name: 'Перейти к оформлению' }).scrollIntoViewIfNeeded();
   await shot('cart-bottom');
 
-  // 5. Checkout, default «Баланс»
+  // 5. Checkout, default «Стандарт»
   await page.getByRole('button', { name: 'Перейти к оформлению' }).click();
   await expectSkeletonThenContent(page);
   const slider = page.getByRole('slider', { name: 'Как привезти' });
-  await expect(slider).toHaveAttribute('aria-valuetext', 'Баланс');
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Стандарт');
   await expect(page.getByText('аптека едет с Самокатом')).toBeVisible();
   await expect(page.getByText(price('2 164'))).toBeVisible();
   await shot('checkout-balance');
@@ -149,7 +149,8 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await slider.focus();
   await page.keyboard.press('ArrowLeft');
   await expect(slider).toHaveAttribute('aria-valuetext', 'Скорее');
-  await expect(page.getByText('приезда', { exact: true })).toBeVisible();
+  await expect(page.getByText('доставки', { exact: true })).toBeVisible();
+  await expect(page.getByText('за доставку', { exact: true })).toBeVisible();
   await expect(page.getByText(price('2 264'))).toBeVisible();
   await shot('checkout-fast');
 
@@ -166,7 +167,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await page.mouse.down();
   await page.mouse.move(box.x + box.width / 2, box.y + 26, { steps: 8 });
   await page.mouse.up();
-  await expect(slider).toHaveAttribute('aria-valuetext', 'Баланс');
+  await expect(slider).toHaveAttribute('aria-valuetext', 'Стандарт');
   await expect(page.getByText(price('2 164'))).toBeVisible();
 
   // 6. One-button payment with the loading state
