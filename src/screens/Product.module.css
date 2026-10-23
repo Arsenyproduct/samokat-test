@@ -1,0 +1,137 @@
+/* Товар / еАптека (374:161) and Товар / Шоколадница (374:194) */
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--statusbar-h) + 4px);
+  bottom: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--bg-card);
+}
+
+.body {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding-bottom: calc(96px + var(--safe-bottom));
+}
+.body::-webkit-scrollbar {
+  display: none;
+}
+
+.photo {
+  position: relative;
+  margin: 10px 10px 0;
+  height: 330px;
+  border-radius: var(--radius-photo);
+  overflow: hidden;
+  background: var(--bg-tile);
+}
+.photo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.actions {
+  position: absolute;
+  top: 10px;
+  right: 6px;
+  display: flex;
+  gap: var(--space-8);
+}
+
+.heartOn {
+  color: var(--brand-red);
+}
+
+.tag {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  padding: var(--space-16) var(--space-20) 0;
+}
+
+.amount {
+  color: var(--text-secondary);
+}
+.hint {
+  color: var(--state-green);
+}
+
+.delivery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-14) var(--space-16);
+  border-radius: var(--radius-card);
+  background: var(--partner-sky-tint);
+  color: var(--partner-ink);
+}
+.deliveryHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  white-space: nowrap;
+}
+.deliveryHead svg {
+  flex: none;
+}
+
+.more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-6);
+  color: var(--text-primary);
+}
+.chev {
+  color: var(--text-secondary);
+}
+
+.addBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(96px + var(--safe-bottom));
+  padding-bottom: calc(24px + var(--safe-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-10);
+  background: var(--brand-red);
+  color: var(--text-on-accent);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+button.addBar:active {
+  background: var(--brand-red-pressed);
+}
+
+.countButton {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+}
+.countButton::before {
+  content: '';
+  position: absolute;
+  inset: -16px -20px;
+}
+.countValue {
+  min-width: 120px;
+  text-align: center;
+  animation: fade-in var(--dur-fast) var(--ease-out);
+}

@@ -5,6 +5,7 @@ import { Home } from './screens/Home';
 import { Story } from './screens/Story';
 import { Catalog } from './screens/Catalog';
 import { Collection } from './screens/Collection';
+import { ProductSheet } from './screens/Product';
 import s from './App.module.css';
 
 const DEVICE_W = 390;
@@ -26,6 +27,8 @@ function Screens() {
       return <Catalog key={key} />;
     case 'collection':
       return <Collection key={key} />;
+    case 'product':
+      return <ProductSheet key={key} id={route.id} />;
   }
 }
 
