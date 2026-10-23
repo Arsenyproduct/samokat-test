@@ -64,6 +64,8 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'Партнёры' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Подборка на вечер' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Открыть: Гречневая/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Поиск' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^Корзина,/ })).toBeVisible();
   await shot('catalog');
 
   // Partners collection

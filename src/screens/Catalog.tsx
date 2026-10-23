@@ -1,4 +1,5 @@
 import { images, products, type ProductId, type StoreId } from '../data/catalog';
+import { BottomBar } from '../components/BottomBar';
 import { Icon } from '../components/Icon';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { IconButton, Skeleton, StatusBar, StoreLogo, useEnterLoading } from '../components/ui';
@@ -85,6 +86,7 @@ export function Catalog() {
         </div>
       </div>
       <StatusBar tone="dark" background="var(--bg-card)" />
+      <BottomBar searchTo={{ name: 'collection' }} />
     </Screen>
   );
 }

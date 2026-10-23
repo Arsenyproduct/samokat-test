@@ -1,0 +1,53 @@
+/* Search pill (360:137) and Cart FAB (360:142) pinned to the bottom of catalog screens */
+
+.bar {
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: calc(30px + var(--safe-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 5;
+}
+.bar > * {
+  pointer-events: auto;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  height: 52px;
+  padding: 15px 26px 15px 24px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-dark-pill);
+  color: var(--text-on-accent);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.search:active {
+  transform: scale(0.97);
+}
+
+.fab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 54px;
+  padding: var(--space-8) var(--space-24);
+  border-radius: var(--radius-pill);
+  background: var(--brand-red);
+  color: var(--text-on-accent);
+  white-space: nowrap;
+  animation: rise-in var(--dur-base) var(--ease-out) both;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.fab:active {
+  transform: scale(0.97);
+  background: var(--brand-red-pressed);
+}
+.fabTime {
+  color: var(--brand-red-tint);
+}

@@ -1,15 +1,13 @@
-import { collection, formatPrice } from '../data/catalog';
-import { Icon } from '../components/Icon';
+import { collection } from '../data/catalog';
+import { BottomBar } from '../components/BottomBar';
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard';
 import { IconButton, StatusBar, useEnterLoading } from '../components/ui';
 import { useRouter } from '../state/router';
-import { useStore } from '../state/store';
 import { Screen, screenStyles } from './Screen';
 import s from './Collection.module.css';
 
 export function Collection() {
   const { navigate, back } = useRouter();
-  const { itemsTotal, itemCount } = useStore();
   const loading = useEnterLoading();
 
   return (
@@ -38,23 +36,7 @@ export function Collection() {
 
       <StatusBar tone="dark" background="var(--bg-page)" />
 
-      <div className={s.bar}>
-        <button type="button" className={s.search} onClick={() => navigate({ name: 'catalog' })}>
-          <Icon name="search" size={22} />
-          <span className="t-button-l">Поиск</span>
-        </button>
-        {itemCount > 0 && (
-          <button
-            type="button"
-            className={s.fab}
-            onClick={() => navigate({ name: 'cart' })}
-            aria-label={`Корзина, ${formatPrice(itemsTotal)}`}
-          >
-            <span className="t-price-l">{formatPrice(itemsTotal)}</span>
-            <span className={`t-caption ${s.fabTime}`}>15 минут</span>
-          </button>
-        )}
-      </div>
+      <BottomBar searchTo={{ name: 'catalog' }} />
     </Screen>
   );
 }

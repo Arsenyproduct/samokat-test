@@ -25,7 +25,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-16);
-  padding: 25px 11px calc(32px + var(--safe-bottom));
+  padding: 25px 11px calc(116px + var(--safe-bottom));
 }
 
 .partnersHead {
