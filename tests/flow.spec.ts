@@ -62,6 +62,8 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await page.getByRole('button', { name: 'К товарам' }).click();
   await expectSkeletonThenContent(page);
   await expect(page.getByRole('heading', { name: 'Партнёры' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Подборка на вечер' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Открыть: Гречневая/ })).toBeVisible();
   await shot('catalog');
 
   // Partners collection
@@ -70,6 +72,23 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expect(page.getByRole('heading', { name: 'Подборка на вечер' })).toBeVisible();
   await expect(page.getByText('для хвостиков')).toBeVisible();
   await shot('collection');
+
+  // Every card opens; Самокат products have no partner delivery block
+  await page.getByRole('button', { name: /Открыть: Молоко/ }).click();
+  await expect(page.getByRole('heading', { name: /Молоко Самокат/ })).toBeVisible();
+  await expect(page.getByText(/^Привезёт/)).toHaveCount(0);
+  await page.goBack();
+  await page.getByRole('button', { name: /Открыть: Игрушка/ }).click();
+  await expect(page.getByText('Привезёт 4 лапы, около часа')).toBeVisible();
+  await page.goBack();
+
+  // Adding keeps the chip the same size, it only turns bright (пломбир is already in the cart)
+  await page.getByRole('button', { name: /^Убрать: Пломбир/ }).click();
+  const addChip = page.getByRole('button', { name: /Добавить в корзину: Пломбир/ });
+  const addBox = await addChip.boundingBox();
+  await addChip.click();
+  const countBox = await page.getByRole('button', { name: /^Убрать: Пломбир/ }).locator('..').boundingBox();
+  expect(Math.round(countBox?.height ?? 0)).toBe(Math.round(addBox?.height ?? -1));
 
   // 3. Product sheet: еАптека
   await page.getByRole('button', { name: /Открыть: Нурофен/ }).click();
@@ -102,6 +121,17 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expect(page.getByText(price('2 065'))).toBeVisible();
   await page.reload();
   await expect(page.getByText(price('2 065'))).toBeVisible();
+  // Swipe down closes the cart and returns to the collection
+  const grab = await page.getByRole('heading', { name: 'Зеленоград, к828' }).boundingBox();
+  if (!grab) throw new Error('cart header is not visible');
+  await page.mouse.move(grab.x + 20, grab.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(grab.x + 20, grab.y + 260, { steps: 10 });
+  await page.mouse.up();
+  await expect(page.getByRole('heading', { name: 'Подборка на вечер' })).toBeVisible();
+  await page.getByRole('button', { name: /^Корзина,/ }).click();
+  await expect(page.getByText(price('2 065'))).toBeVisible();
+
   await page.getByRole('button', { name: 'Перейти к оформлению' }).scrollIntoViewIfNeeded();
   await shot('cart-bottom');
 
@@ -159,6 +189,11 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expect(page.getByRole('button', { name: 'Объединить' })).toHaveCount(0);
   await shot('merged');
 
+  // Bars keep running; every trip ends with «Заказ у двери»
+  await expect(page.getByText('Заказ у двери', { exact: true })).toHaveCount(3, { timeout: 40_000 });
+  await expect(page.getByRole('heading', { name: 'Весь заказ у двери' })).toBeVisible();
+  await shot('delivered');
+
   // System back from tracking goes to the previous screen
   await page.goBack();
   await expect(page.getByRole('slider', { name: 'Как привезти' })).toBeVisible();
@@ -177,6 +212,7 @@ test('delay proposal can be dismissed with «Оставить»', async ({ page 
   await page.getByRole('button', { name: 'Оставить' }).click();
   await expect(page.getByRole('button', { name: 'Оставить' })).toHaveCount(0);
   await expect(page.getByText('задержка', { exact: true })).toBeVisible();
+  await expect(page.getByText('Заказ у двери', { exact: true })).toHaveCount(3, { timeout: 40_000 });
   await page.waitForTimeout(400);
   await page.screenshot({ path: `tests/screenshots/${testInfo.project.name}/17-delay-kept.png` });
   expect(problems, problems.join('\n')).toEqual([]);
