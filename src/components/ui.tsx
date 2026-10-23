@@ -150,11 +150,11 @@ export function PriceChip({ price, count, onAdd, onRemove, label }: { price: num
   return (
     <div className={s.chipCount}>
       <button type="button" className={s.chipCountButton} onClick={onRemove} aria-label={`Убрать: ${label}`}>
-        <Icon name="minus" size={20} stroke={2.4} />
+        <Icon name="minus" size={16} stroke={1.92} />
       </button>
       <span aria-live="polite">{formatPrice(price * count)}</span>
       <button type="button" className={s.chipCountButton} onClick={onAdd} aria-label={`Добавить: ${label}`}>
-        <Icon name="plus" size={20} stroke={2.4} />
+        <Icon name="plus" size={16} stroke={1.92} />
       </button>
     </div>
   );
