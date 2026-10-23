@@ -14,7 +14,7 @@ const places: Record<StoreId, { pin: Point; route: Point[] }> = {
   samokat: { pin: [296, 98], route: [[313, 115], [235, 115], [235, 231]] },
   lenta: { pin: [296, 272], route: [[313, 289], [313, 231], [235, 231]] },
   '4lapy': { pin: [140, 272], route: [[157, 289], [157, 237], [235, 237]] },
-  shokoladnitsa: { pin: [63, 293], route: [[80, 310], [80, 254], [235, 254]] },
+  shokoladnitsa: { pin: [63, 293], route: [[80, 310], [80, 254], [234.5, 254], [234.5, 233.4]] },
   eapteka: { pin: [62, 40], route: [[79, 57], [79, 225], [235, 225]] },
 };
 
