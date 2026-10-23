@@ -1,0 +1,98 @@
+/*
+  Design tokens from the Figma collection "Samokat / tokens" and its text styles.
+  Every color, radius and type size in the app comes from here.
+*/
+:root {
+  /* brand */
+  --brand-red: #ff335f;
+  --brand-red-pressed: #e02a52;
+  --brand-red-tint: #ffe6ec;
+
+  /* surfaces */
+  --bg-page: #f2f2f2;
+  --bg-card: #ffffff;
+  --bg-tile: #f3f3f3;
+  --bg-dark-pill: #4d4d4f;
+  --bg-overlay: #2b2b2d;
+  --line-divider: #eaeaea;
+
+  /* text */
+  --text-primary: #3b3b3d;
+  --text-secondary: #9a9a9e;
+  --text-on-accent: #ffffff;
+
+  /* states */
+  --state-green: #0ba84a;
+  --state-green-tint: #dff5e7;
+  --state-amber: #f5a524;
+  --state-amber-tint: #fff1d6;
+
+  /* partners and stores */
+  --partner-sky: #bfddf5;
+  --partner-sky-tint: #e3f1fc;
+  --partner-ink: #2f5a82;
+  --store-samokat: #ff335f;
+  --store-eapteka: #1fa65b;
+  --store-4lapy: #f28c28;
+  --store-shokoladnitsa: #7a3e2b;
+  --store-lenta: #1f5bd6;
+
+  /* catalog tile and tracking map (local values used by the Figma frames) */
+  --bg-catalog-tile: #efeff0;
+  --map-block: #e9ece6;
+  --map-park: #d6ebd0;
+  --map-label: #8c918a;
+  --map-river: #c7e2f3;
+
+  /* radii */
+  --radius-sheet: 28px;
+  --radius-card: 24px;
+  --radius-photo: 22px;
+  --radius-tile: 20px;
+  --radius-chip: 14px;
+  --radius-pill: 999px;
+
+  /* spacing scale used across the frames */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-14: 14px;
+  --space-16: 16px;
+  --space-18: 18px;
+  --space-20: 20px;
+  --space-24: 24px;
+
+  /* type */
+  --font: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 360ms;
+
+  /* device chrome */
+  --statusbar-h: 44px;
+  --safe-bottom: 0px;
+}
+
+/* Text styles, 1:1 with Figma */
+.t-story { font: 700 30px/34px var(--font); }
+.t-h1 { font: 700 24px/28px var(--font); }
+.t-h2 { font: 700 20px/24px var(--font); }
+.t-h3 { font: 600 17px/22px var(--font); }
+.t-body-m { font: 500 15px/20px var(--font); }
+.t-body-s { font: 500 13px/17px var(--font); }
+.t-caption { font: 500 12px/16px var(--font); }
+.t-price-l { font: 700 17px/22px var(--font); }
+.t-price-xl { font: 700 36px/40px var(--font); }
+.t-button-l { font: 700 17px/22px var(--font); }
+.t-button-m { font: 700 14px/18px var(--font); }
+
+/* Numeric accents used in the frames (ExtraBold, not a named style) */
+.t-num-24 { font: 800 24px/28px var(--font); }
+.t-num-20 { font: 800 20px/24px var(--font); }
+.t-num-17 { font: 800 17px/22px var(--font); }

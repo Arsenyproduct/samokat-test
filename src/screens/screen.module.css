@@ -1,0 +1,67 @@
+/* Shared screen scaffolding: a fixed layer with a scrolling body inside. */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg-page);
+}
+
+.forward {
+  animation: push-in var(--dur-base) var(--ease-out) both;
+}
+
+.back {
+  animation: fade-in var(--dur-fast) var(--ease-out) both;
+}
+
+.scroll {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Header: back button on the left, title centered (Каталог, Подборка, Оформление) */
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  margin-top: calc(var(--statusbar-h) + 8px);
+}
+.headerBack {
+  position: absolute;
+  left: 12px;
+  top: 0;
+}
+.headerTitle {
+  font: 700 20px/24px var(--font);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Overlay sheets (product, cart): dark backdrop with a white sheet from 48 px */
+.overlay {
+  background: var(--bg-overlay);
+}
+.sheetEnter {
+  animation: sheet-in var(--dur-slow) var(--ease-out) both;
+}
+
+/* Fade for content replacing a skeleton */
+.reveal {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+}

@@ -1,0 +1,92 @@
+/* Desktop: dark stage with the phone in the middle. Phone: the flow only. */
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #2a2a2d;
+}
+
+.intro {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  max-width: 320px;
+}
+
+.introTitle {
+  font: 700 24px/28px var(--font);
+  color: var(--text-on-accent);
+}
+
+.introText {
+  margin-top: 12px;
+  font: 500 15px/20px var(--font);
+  color: #b9b9be;
+}
+
+.deviceBox {
+  position: relative;
+  flex: none;
+}
+
+.device {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 390px;
+  height: 844px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  border-radius: 44px;
+  background: var(--bg-page);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.42),
+    0 8px 24px rgba(0, 0, 0, 0.24);
+  isolation: isolate;
+}
+
+@media (max-width: 1100px) and (min-width: 481px) {
+  .stage {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 28px;
+    padding: 32px 24px;
+  }
+  .intro {
+    position: static;
+    max-width: 440px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --statusbar-h: max(env(safe-area-inset-top), 12px);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+  .stage {
+    display: block;
+    padding: 0;
+    min-height: 0;
+  }
+  .intro {
+    display: none;
+  }
+  .deviceBox {
+    width: 100% !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+  .device {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none !important;
+  }
+}
