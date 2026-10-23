@@ -31,7 +31,8 @@ type Store = PersistedState & {
   setOrderForOther: (value: boolean) => void;
   setUseBonus: (value: boolean) => void;
   setScenario: (value: ScenarioId) => void;
-  pay: () => void;
+  /** Pays the order; `scenario` overrides the slider (single-store orders have no slider). */
+  pay: (scenario?: ScenarioId) => void;
   /** Runs the tracking clock (tracking screen is open). */
   resumeTracking: () => void;
   /** Freezes the tracking clock (order change screens are open). */
@@ -125,8 +126,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setOrderForOther: (orderForOther) => setState((s) => ({ ...s, orderForOther })),
       setUseBonus: (useBonus) => setState((s) => ({ ...s, useBonus })),
       setScenario: (scenario) => setState((s) => ({ ...s, scenario })),
-      pay: () =>
-        setState((s) => ({ ...s, paidScenario: s.scenario, trackBase: 0, trackRunningSince: Date.now(), delayDecision: null })),
+      pay: (scenario) =>
+        setState((s) => ({
+          ...s,
+          paidScenario: scenario ?? s.scenario,
+          trackBase: 0,
+          trackRunningSince: Date.now(),
+          delayDecision: null,
+        })),
       resumeTracking: () => setState((s) => (s.trackRunningSince === null ? { ...s, trackRunningSince: Date.now() } : s)),
       pauseTracking: () =>
         setState((s) =>

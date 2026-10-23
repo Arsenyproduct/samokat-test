@@ -46,25 +46,29 @@ function TripCard({ trip }: { trip: BuiltTrip }) {
 
 export function Checkout() {
   const { navigate, back } = useRouter();
-  const { cart, scenario, setScenario, cartTotal, pay } = useStore();
+  const { cart, scenario: chosen, setScenario, cartTotal, pay, storesInCart } = useStore();
   const loading = useEnterLoading();
   const [paying, setPaying] = useState(false);
   const tripsRef = useRef<HTMLDivElement>(null);
 
+  // With one store there is nothing to combine: no slider, one trip at its own time.
+  const single = storesInCart.size <= 1;
+  const scenario = single ? 'fast' : chosen;
   const current = scenarios[scenario];
   const trips = buildTrips(scenario, cart);
-  const total = cartTotal + current.delivery;
+  const delivery = single ? 0 : current.delivery;
+  const total = cartTotal + delivery;
 
   useFlip(tripsRef, loading ? 'loading' : scenario);
 
   useEffect(() => {
     if (!paying) return;
     const timer = window.setTimeout(() => {
-      pay();
+      pay(single ? scenario : undefined);
       navigate({ name: 'tracking' });
     }, LOADING_MS);
     return () => window.clearTimeout(timer);
-  }, [paying, pay, navigate]);
+  }, [paying, pay, navigate, single, scenario]);
 
   return (
     <Screen label={checkoutCopy.title}>
@@ -75,31 +79,33 @@ export function Checkout() {
         </div>
 
         <div className={s.content}>
-          <section className={`${s.card} ${s.how}`}>
-            <h2 className="t-h1">{checkoutCopy.question}</h2>
-            <p className={`t-body-s ${s.muted}`}>{checkoutCopy.hint}</p>
-            <DeliverySlider value={scenario} onChange={setScenario} />
-            <div className={s.stats} aria-live="polite">
-              <div className={s.stat}>
-                <span key={trips.length} className={`t-num-20 ${s.statValue}`}>
-                  {trips.length}
-                </span>
-                <span className={`t-caption ${s.muted}`}>{checkoutCopy.arrivalsLabel(trips.length)}</span>
+          {!single && (
+            <section className={`${s.card} ${s.how}`}>
+              <h2 className="t-h1">{checkoutCopy.question}</h2>
+              <p className={`t-body-s ${s.muted}`}>{checkoutCopy.hint}</p>
+              <DeliverySlider value={scenario} onChange={setScenario} />
+              <div className={s.stats} aria-live="polite">
+                <div className={s.stat}>
+                  <span key={trips.length} className={`t-num-20 ${s.statValue}`}>
+                    {trips.length}
+                  </span>
+                  <span className={`t-caption ${s.muted}`}>{checkoutCopy.arrivalsLabel(trips.length)}</span>
+                </div>
+                <div className={s.stat}>
+                  <span key={latestTime(trips)} className={`t-num-20 ${s.statValue}`}>
+                    {latestTime(trips)}
+                  </span>
+                  <span className={`t-caption ${s.muted}`}>{checkoutCopy.lastLabel}</span>
+                </div>
+                <div className={s.stat}>
+                  <span key={delivery} className={`t-num-20 ${s.statValue}`}>
+                    {formatPrice(delivery)}
+                  </span>
+                  <span className={`t-caption ${s.muted}`}>{checkoutCopy.deliveryLabel}</span>
+                </div>
               </div>
-              <div className={s.stat}>
-                <span key={latestTime(trips)} className={`t-num-20 ${s.statValue}`}>
-                  {latestTime(trips)}
-                </span>
-                <span className={`t-caption ${s.muted}`}>{checkoutCopy.lastLabel}</span>
-              </div>
-              <div className={s.stat}>
-                <span key={current.delivery} className={`t-num-20 ${s.statValue}`}>
-                  {formatPrice(current.delivery)}
-                </span>
-                <span className={`t-caption ${s.muted}`}>{checkoutCopy.deliveryLabel}</span>
-              </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           <div className={s.trips} ref={tripsRef} aria-busy={loading}>
             {trips.map((trip) => (loading ? <TripSkeleton key={trip.id} trip={trip} /> : <TripCard key={trip.id} trip={trip} />))}

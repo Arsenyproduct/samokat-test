@@ -269,3 +269,19 @@ test('change the order while stores have not started, then the button disappears
   await expect(page.getByRole('button', { name: 'Изменить заказ' })).toHaveCount(0, { timeout: 25_000 });
   expect(problems, problems.join('\n')).toEqual([]);
 });
+
+test('an order from one store has no slider', async ({ page }) => {
+  const problems = watchConsole(page);
+  await page.goto('#/cart');
+  await page.getByRole('button', { name: 'Убрать: Игрушка для собак «Лиса» с канатом' }).click();
+  await page.getByRole('button', { name: 'Убрать: Гречневая крупа Лента, 800 г' }).click();
+  await page.getByRole('button', { name: 'Перейти к оформлению' }).click();
+  await expect(page.getByRole('heading', { name: 'Оформление' })).toBeVisible();
+  await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+  await expect(page.getByRole('slider')).toHaveCount(0);
+  await expect(page.getByText('Как привезти?')).toHaveCount(0);
+  await expect(page.getByText(price('318'))).toBeVisible();
+  await page.getByRole('button', { name: 'Оплатить' }).click();
+  await expect(page.getByRole('heading', { name: 'Самокат приедет в 14:31' })).toBeVisible();
+  expect(problems, problems.join('\n')).toEqual([]);
+});

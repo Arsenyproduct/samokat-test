@@ -94,12 +94,15 @@ export function Tracking() {
   const lastArrived = [...arrived].sort((a, b) => arrivalMs(b.time) - arrivalMs(a.time))[0];
   const proposalOpen = delayed && decision === null && !!delay && !allDelivered;
 
+  const singleRow = storesInCart.size === 1 && rows.length === 1 ? rows[0] : undefined;
   const title = allDelivered
     ? trackingCopy.allDelivered
+    : singleRow
+      ? trackingCopy.single(rowTitle(singleRow, storesInCart), singleRow.time)
     : proposalOpen
       ? delayCopy.title
       : (lastArrived?.doorTitle ?? (delayed ? delayCopy.title : scenario.tracking.title));
-  const subtitle = allDelivered
+  const subtitle = allDelivered || singleRow
     ? undefined
     : delayed
       ? decision === 'merged'

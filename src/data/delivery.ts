@@ -249,6 +249,8 @@ export const trackingCopy = {
   allDelivered: 'Весь заказ у двери',
   /** One button under the trips while some store has not started assembling (frame 2.4). */
   editOrder: 'Изменить заказ',
+  /** Order from one store: no trips to compare (derived). */
+  single: (store: string, time: string) => `${store} приедет в ${time}`,
 };
 
 /**
