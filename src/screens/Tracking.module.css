@@ -75,6 +75,9 @@
   gap: var(--space-6);
   white-space: nowrap;
 }
+.delivered {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+}
 .chip {
   padding: var(--space-2) var(--space-8);
   border-radius: var(--radius-pill);

@@ -233,6 +233,13 @@ export const scenarios: Record<ScenarioId, Scenario> = {
   },
 };
 
+export const trackingCopy = {
+  /** Shown when a row's bar reaches the end. */
+  delivered: 'Заказ у двери',
+  /** Sheet title once every row has arrived. */
+  allDelivered: 'Весь заказ у двери',
+};
+
 /** The delay event on the tracking screen (frame 2.5). */
 export const delayCopy = {
   afterMs: 6000,

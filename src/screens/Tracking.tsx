@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { stores, type StoreId } from '../data/catalog';
-import { delayCopy, scenarios, type TrackRow } from '../data/delivery';
+import { delayCopy, scenarios, trackingCopy, type TrackRow } from '../data/delivery';
 import { DeliverySlider } from '../components/DeliverySlider';
 import { Icon } from '../components/Icon';
 import { TrackingMap } from '../components/TrackingMap';
@@ -14,30 +14,36 @@ const TICK_MS = 500;
 
 type Decision = 'merged' | 'kept' | null;
 
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/**
+ * When a row arrives, in ms after tracking opens. Later ETAs arrive later, but
+ * the whole order is delivered within about half a minute so the screen keeps moving.
+ */
+function arrivalMs(time: string) {
+  const [h = 0, m = 0] = time.split(':').map(Number);
+  const minutes = Math.max(1, h * 60 + m - (14 * 60 + 16));
+  return 8000 + Math.sqrt(minutes) * 1600;
+}
 
-/** Progress share of a row at `elapsed` ms: start → value at the delay, then slowly on. */
+/** Share of the way already driven, 0..1. */
+function shareOf(row: TrackRow, elapsed: number) {
+  return Math.min(1, elapsed / arrivalMs(row.time));
+}
+
 function progressOf(row: TrackRow, elapsed: number) {
-  const [start, atDelay] = row.progress;
-  if (elapsed <= delayCopy.afterMs) return lerp(start, atDelay, elapsed / delayCopy.afterMs);
-  if (atDelay === start) return start;
-  const after = Math.min(1, (elapsed - delayCopy.afterMs) / 90_000);
-  return lerp(atDelay, Math.min(0.96, atDelay + 0.3), after);
+  const start = row.progress[0];
+  return start + (1 - start) * shareOf(row, elapsed);
 }
 
 function chipOf(row: TrackRow, elapsed: number) {
   if (!row.chip) return null;
   if (row.chip.kind === 'static') return { text: row.chip.text, tone: row.chip.tone };
-  const { from, to } = row.chip;
-  const minutes =
-    elapsed <= delayCopy.afterMs
-      ? Math.round(lerp(from, to, elapsed / delayCopy.afterMs))
-      : Math.max(1, to - Math.floor((elapsed - delayCopy.afterMs) / 20_000));
+  const minutes = Math.max(1, Math.ceil(row.chip.from * (1 - shareOf(row, elapsed))));
   return { text: `${minutes} мин`, tone: 'green' as const };
 }
 
 function TrackRowCard({ row, elapsed, inCart, isNew }: { row: TrackRow; elapsed: number; inCart: Set<StoreId>; isNew: boolean }) {
   const title = row.title ?? row.stores.filter((id) => inCart.has(id)).map((id) => stores[id].name).join(', ');
+  const delivered = shareOf(row, elapsed) >= 1;
   const chip = chipOf(row, elapsed);
   return (
     <div className={`${s.row} ${isNew ? s.rowNew : screenStyles.reveal}`} data-flip={row.id}>
@@ -46,18 +52,26 @@ function TrackRowCard({ row, elapsed, inCart, isNew }: { row: TrackRow; elapsed:
           <StoreLogo store={row.logo} size={17} />
           <span className="t-h3">{title}</span>
         </div>
-        <span className="t-num-17">{row.time}</span>
+        {!delivered && <span className="t-num-17">{row.time}</span>}
       </div>
-      <div className={s.rowStatus}>
-        <span className={`t-body-s ${s.muted}`}>{row.status}</span>
-        {chip && <span className={`${s.chip} ${chip.tone === 'amber' ? s.amber : s.green}`}>{chip.text}</span>}
-      </div>
-      <div className={s.track}>
-        <div
-          className={s.progress}
-          style={{ width: `${progressOf(row, elapsed) * 100}%`, background: stores[row.logo].color }}
-        />
-      </div>
+      {delivered ? (
+        <div className={`${s.rowStatus} ${s.delivered}`}>
+          <span className={`${s.chip} ${s.green}`}>{trackingCopy.delivered}</span>
+        </div>
+      ) : (
+        <>
+          <div className={s.rowStatus}>
+            <span className={`t-body-s ${s.muted}`}>{row.status}</span>
+            {chip && <span className={`${s.chip} ${chip.tone === 'amber' ? s.amber : s.green}`}>{chip.text}</span>}
+          </div>
+          <div className={s.track}>
+            <div
+              className={s.progress}
+              style={{ width: `${progressOf(row, elapsed) * 100}%`, background: stores[row.logo].color }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -110,16 +124,23 @@ export function Tracking() {
 
   useFlip(sheetRef, `${loading}-${delayed}-${decision}`);
 
-  // Couriers of the first trip drive towards home while the rest wait at the halfway mark.
-  const firstRow = scenario.tracking.rows[0];
-  const drive = firstRow ? progressOf(firstRow, elapsed) : 0;
+  // Each courier drives from its store to home together with its row.
   const couriers: Partial<Record<Exclude<StoreId, 'shokoladnitsa'>, number>> = {};
-  for (const store of ['eapteka', 'samokat', '4lapy', 'lenta'] as const) {
-    couriers[store] = firstRow?.chip && firstRow.stores.includes(store) ? 0.5 + (drive - (firstRow.progress[0] ?? 0)) * 0.9 : 0.5;
+  for (const row of rows) {
+    for (const store of row.stores) {
+      if (store !== 'shokoladnitsa') couriers[store] = 0.5 + 0.5 * shareOf(row, elapsed);
+    }
   }
 
-  const title = delayed ? delayCopy.title : scenario.tracking.title;
-  const subtitle = delayed ? (decision === 'merged' ? undefined : delayCopy.subtitle) : scenario.tracking.subtitle;
+  const allDelivered = !loading && rows.length > 0 && rows.every((row) => shareOf(row, elapsed) >= 1);
+  const title = allDelivered ? trackingCopy.allDelivered : delayed ? delayCopy.title : scenario.tracking.title;
+  const subtitle = allDelivered
+    ? undefined
+    : delayed
+      ? decision === 'merged'
+        ? undefined
+        : delayCopy.subtitle
+      : scenario.tracking.subtitle;
 
   return (
     <Screen label="Трекинг заказа">
@@ -141,7 +162,7 @@ export function Tracking() {
             )}
           </div>
 
-          {delayed && decision === null && delay && (
+          {delayed && decision === null && delay && !allDelivered && (
             <div className={s.proposal} role="region" aria-label={delayCopy.proposalTitle}>
               <p className={s.proposalHead}>
                 <Icon name="warn" size={20} className={s.warn} />
