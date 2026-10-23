@@ -4,7 +4,7 @@
 Одна корзина с товарами из нескольких магазинов с разным сроком доставки, одна оплата, общие промокод и бонусы.
 Прототип показывает сценарий «Ползунок»: клиент сам выбирает, как получить заказ (скорее, баланс, всё сразу).
 
-**Живая версия:** https://arsenyproduct.github.io/samokat-test-task/
+**Живая версия:** https://arsenyproduct.github.io/samokat-test/
 
 Сайт публикуется GitHub Actions из ветки `main` по адресу `https://<владелец>.github.io/<репозиторий>/`:
 путь берётся из имени репозитория автоматически. Если репозиторий называется иначе, ссылка меняется вместе с ним.
@@ -59,7 +59,7 @@ Vite, React, TypeScript (strict), CSS Modules и CSS-переменные из �
 
 ```bash
 npm ci
-npm run dev        # http://localhost:5173/samokat-test-task/
+npm run dev        # http://localhost:5173/samokat-test/
 npm run build      # проверка типов и сборка в dist/
 npm run preview    # собранная версия
 ```

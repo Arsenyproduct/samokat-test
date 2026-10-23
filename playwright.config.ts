@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: false,
   reporter: [['list']],
   use: {
-    baseURL: `http://localhost:${port}/samokat-test-task/`,
+    baseURL: `http://localhost:${port}/samokat-test/`,
     trace: 'retain-on-failure',
   },
   projects: [
@@ -25,6 +25,6 @@ export default defineConfig({
     command: `npm run build && npx vite preview --port ${port} --strictPort`,
     port,
     reuseExistingServer: !process.env.CI,
-    env: { BASE_PATH: '/samokat-test-task/' },
+    env: { BASE_PATH: '/samokat-test/' },
   },
 });
