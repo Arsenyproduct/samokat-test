@@ -7,6 +7,7 @@ import { Catalog } from './screens/Catalog';
 import { Collection } from './screens/Collection';
 import { ProductSheet } from './screens/Product';
 import { Cart } from './screens/Cart';
+import { Checkout } from './screens/Checkout';
 import s from './App.module.css';
 
 const DEVICE_W = 390;
@@ -32,6 +33,8 @@ function Screens() {
       return <ProductSheet key={key} id={route.id} />;
     case 'cart':
       return <Cart key={key} />;
+    case 'checkout':
+      return <Checkout key={key} />;
   }
 }
 
