@@ -13,9 +13,9 @@
 }
 .back {
   position: absolute;
-  left: 11px;
-  top: 0;
-  height: 29px;
+  left: 4px;
+  top: -8px;
+  background: none;
 }
 .title {
   margin-top: 2px;

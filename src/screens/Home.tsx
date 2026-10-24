@@ -36,6 +36,8 @@ export function Home() {
   const storyOpen = route.name === 'story';
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pull, setPull] = useState<{ start: number; dy: number } | null>(null);
+  // Releasing a pull fires a click on whatever is under the pointer, the news included.
+  const pullEndedAt = useRef(0);
 
   // The photo lives at the top of the scroll, so the story always starts from there.
   useLayoutEffect(() => {
@@ -65,7 +67,12 @@ export function Home() {
     if (!pull) return;
     // A tap or a pull up returns home; a short drag springs back.
     if (Math.abs(pull.dy) < 6 || -pull.dy >= PULL_TO_CLOSE) back();
+    pullEndedAt.current = Date.now();
     setPull(null);
+  };
+
+  const openStory = () => {
+    if (Date.now() - pullEndedAt.current > 400) navigate({ name: 'story' });
   };
 
   const lift = pull ? Math.max(0, -pull.dy) : 0;
@@ -82,7 +89,7 @@ export function Home() {
             <div className={s.scrimBottom} />
 
             <div className={s.homeLayer} inert={storyOpen}>
-              <button type="button" className={s.news} onClick={() => navigate({ name: 'story' })}>
+              <button type="button" className={s.news} onClick={openStory}>
                 <span className={`t-h2 ${s.newsTitle}`}>{newsTitle}</span>
                 <span className={`t-button-l ${s.newsCta}`}>Смотреть</span>
               </button>

@@ -64,6 +64,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
 
   // Pulling the handle up returns home too, then the story opens once more
   const handle = page.getByText('Тяните вверх, чтобы вернуться');
+  await page.waitForTimeout(600); // let the sheet settle at the bottom
   const hb = (await handle.boundingBox())!;
   await page.mouse.move(hb.x + hb.width / 2, hb.y);
   await page.mouse.down();

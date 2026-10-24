@@ -50,7 +50,7 @@ export function Catalog() {
     <Screen label="Каталог" className={s.screen}>
       <div className={screenStyles.scroll}>
         <div className={s.header}>
-          <IconButton icon="back" label="Назад" className={s.back} onClick={back} />
+          <IconButton icon="chevL" iconSize={36} label="Назад" className={s.back} onClick={back} />
           <h1 className={`t-h2 ${s.title}`}>Каталог</h1>
         </div>
 
