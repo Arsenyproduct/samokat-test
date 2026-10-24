@@ -40,6 +40,99 @@ function pointAt(line: Point[], t: number): Point {
 
 const toPath = (line: Point[]) => line.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y}`).join(' ');
 
+/**
+ * Blocks replaced by bigger shapes. Routes run along the streets between
+ * blocks, so the shapes stay inside block areas and keep the streets free.
+ */
+const merged = new Set([
+  '-70:122', '8:122', '-70:180', '8:180', // park
+  '86:6', '164:6', // mall
+  '164:64', // square
+  '320:-52', '320:6', // stadium
+  '242:6', // school
+  '242:180', // two houses
+  '242:122', // garden
+  '320:238', // small park by the river
+  '-70:296', '8:296', '-70:354', '8:354', // square in the south-west
+]);
+
+/** Park, mall, square, stadium and other shapes that make the city less of a grid. */
+function CityShapes() {
+  return (
+    <g>
+      {/* Парк Победы: one green area over four blocks, with a pond and paths */}
+      <rect x="-70" y="122" width="142" height="102" rx="14" fill="var(--map-park)" />
+      <path d="M-60 214 C-20 190 0 170 20 150 S60 130 66 128" fill="none" stroke="#fff" strokeWidth="2" strokeOpacity="0.8" strokeDasharray="1 4" strokeLinecap="round" />
+      <ellipse cx="34" cy="190" rx="22" ry="13" fill="var(--map-river)" />
+      <circle cx="-8" cy="146" r="5" fill="#c5e2bd" />
+      <circle cx="6" cy="138" r="4" fill="#c5e2bd" />
+      <circle cx="58" cy="148" r="6" fill="#c5e2bd" />
+
+      {/* ТЦ: a long building with a courtyard */}
+      <rect x="86" y="6" width="142" height="44" rx="6" fill="#e1e4dd" />
+      <rect x="140" y="16" width="34" height="24" rx="4" fill="var(--map-block)" />
+
+      {/* Square with a fountain */}
+      <rect x="164" y="64" width="64" height="44" rx="6" fill="#f1f2ee" />
+      <circle cx="196" cy="86" r="13" fill="none" stroke="var(--map-block)" strokeWidth="5" />
+      <circle cx="196" cy="86" r="4" fill="var(--map-river)" />
+
+      {/* Stadium */}
+      <rect x="320" y="-52" width="64" height="102" rx="10" fill="var(--map-park)" />
+      <rect x="331" y="-30" width="42" height="62" rx="21" fill="none" stroke="#fff" strokeWidth="3" />
+
+      {/* School: an L-shaped building */}
+      <path d="M242 12a6 6 0 0 1 6-6h52a6 6 0 0 1 6 6v8a6 6 0 0 1-6 6h-22v18a6 6 0 0 1-6 6h-24a6 6 0 0 1-6-6z" fill="var(--map-block)" />
+      <rect x="286" y="32" width="20" height="18" rx="4" fill="var(--map-park)" />
+
+      {/* Garden next to the samokat */}
+      <rect x="242" y="122" width="64" height="44" rx="8" fill="var(--map-park)" />
+
+      {/* Two houses instead of one block */}
+      <rect x="242" y="180" width="28" height="44" rx="5" fill="var(--map-block)" />
+      <rect x="276" y="180" width="30" height="20" rx="5" fill="var(--map-block)" />
+      <rect x="276" y="204" width="30" height="20" rx="5" fill="var(--map-block)" />
+
+      {/* Small park by the river */}
+      <rect x="320" y="238" width="64" height="44" rx="8" fill="var(--map-park)" />
+
+      {/* South-west square with a round flower bed */}
+      <rect x="-70" y="296" width="142" height="102" rx="14" fill="var(--map-park)" />
+      <circle cx="10" cy="340" r="16" fill="#c5e2bd" />
+    </g>
+  );
+}
+
+/** Points of interest: a dot with a name, kept off the routes and the store pins. */
+const pois: { x: number; y: number; name: string }[] = [
+  { x: 101, y: 196, name: 'Библиотека' },
+  { x: 179, y: 140, name: 'Почта' },
+  { x: 257, y: 18, name: 'Школа №7' },
+];
+
+function MapLabels() {
+  return (
+    <g fontFamily="Onest, sans-serif" fontWeight="500" fontSize="9" fill="var(--map-label)">
+      <text x="100" y="60">ул. Центральная</text>
+      <text x="186" y="292">просп. Мира</text>
+      <text x="6" y="172">Парк Победы</text>
+      <text x="157" y="31" textAnchor="middle">ТЦ «Галерея»</text>
+      <text x="196" y="117" textAnchor="middle" fontSize="8">пл. Пушкина</text>
+      <text x="352" y="45" textAnchor="middle">Стадион</text>
+      <text x="316" y="102" transform="rotate(-90 316 102)" fontSize="8">ул. Лесная</text>
+      <text x="368" y="190" transform="rotate(-78 368 190)" fontSize="8">наб. Речная</text>
+      {pois.map((poi) => (
+        <g key={poi.name}>
+          <circle cx={poi.x} cy={poi.y} r="3.5" fill="#fff" stroke="var(--map-label)" strokeWidth="1.5" />
+          <text x={poi.x + 7} y={poi.y + 3} fontSize="8">
+            {poi.name}
+          </text>
+        </g>
+      ))}
+    </g>
+  );
+}
+
 /** Courier glyph (Courier icon, 15 px) centered at 0,0. */
 function CourierGlyph() {
   return (
@@ -76,12 +169,13 @@ export function TrackingMap({ trips }: { trips: MapTrip[] }) {
       </defs>
 
       {columns.map((x) =>
-        rows.map((y) => <rect key={`${x}:${y}`} x={x} y={y} width="64" height="44" rx="6" fill="var(--map-block)" />),
+        rows.map((y) =>
+          merged.has(`${x}:${y}`) ? null : (
+            <rect key={`${x}:${y}`} x={x} y={y} width="64" height="44" rx="6" fill="var(--map-block)" />
+          ),
+        ),
       )}
-      <rect x="-70" y="180" width="142" height="44" rx="8" fill="var(--map-park)" />
-      <rect x="242" y="122" width="64" height="44" rx="8" fill="var(--map-park)" />
-      <rect x="320" y="238" width="64" height="44" rx="8" fill="var(--map-park)" />
-
+      <CityShapes />
       <path
         d="M63.25 0C18.25 70 38.25 150 8.25 210C-21.75 270 38.25 310 58.25 360"
         transform="translate(341.75 -10)"
@@ -98,11 +192,7 @@ export function TrackingMap({ trips }: { trips: MapTrip[] }) {
         <path key={store} d={toPath(places[store].route)} fill="none" stroke={stores[store].color} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       ))}
 
-      <g fontFamily="Onest, sans-serif" fontWeight="500" fontSize="9" fill="var(--map-label)">
-        <text x="100" y="59">ул. Центральная</text>
-        <text x="-50" y="204">Парк</text>
-        <text x="243" y="301">просп. Мира</text>
-      </g>
+      <MapLabels />
 
       {trips.map(({ store, share }) => {
         const [x, y] = pointAt(places[store].route, 0.5 + 0.5 * share);
