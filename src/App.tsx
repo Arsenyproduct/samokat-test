@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { RouterProvider, routeToHash, useRouter } from './state/router';
 import { StoreProvider } from './state/store';
 import { Home } from './screens/Home';
-import { Story } from './screens/Story';
 import { Catalog } from './screens/Catalog';
 import { Collection } from './screens/Collection';
 import { ProductSheet } from './screens/Product';
@@ -24,9 +23,9 @@ function Screens() {
   const key = routeToHash(route);
   switch (route.name) {
     case 'home':
-      return <Home key={key} />;
     case 'story':
-      return <Story key={key} />;
+      // One screen for both: the story opens and closes as a transition of the home.
+      return <Home key="home" />;
     case 'catalog':
       return <Catalog key={key} />;
     case 'collection':

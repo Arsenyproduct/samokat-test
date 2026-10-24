@@ -41,22 +41,39 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   const problems = watchConsole(page);
   const shot = shooter(page, testInfo.project.name);
 
-  // 1. Home, variant A
+  // 1. Home, variant C
   await page.goto('#/home');
-  await expect(page.getByText('Аптека, зоомагазин и кафе теперь в Самокате')).toBeVisible();
+  await expect(page.getByRole('button', { name: /Аптека, зоомагазин, кафе и гипермаркеты/ })).toBeVisible();
   await expect(page.getByText('Ооооострова с призами')).toBeVisible();
   await shot('home');
 
-  // News → story, variant B
-  await page.getByRole('button', { name: /Аптека, зоомагазин и кафе/ }).click();
-  await expect(page.getByRole('heading', { name: 'Что привезём первым' })).toBeVisible();
+  // «Смотреть» → story: the sheet drops to the handle, the photo becomes the card
+  const storyTitle = page.getByRole('heading', { name: 'Аптека, зоомагазин, кафе и гипермаркеты теперь в Самокате' });
+  await page.getByRole('button', { name: /Аптека, зоомагазин, кафе и гипермаркеты/ }).click();
+  await expect(storyTitle).toBeVisible();
+  await expect(page.getByText('Тяните вверх, чтобы вернуться')).toBeVisible();
+  await page.waitForTimeout(800);
   await shot('story');
 
   // Back gesture returns to home, then forward again
   await page.goBack();
   await expect(page.getByText('Ооооострова с призами')).toBeVisible();
+  await expect(storyTitle).toHaveCSS('opacity', '0');
   await page.goForward();
-  await expect(page.getByRole('heading', { name: 'Что привезём первым' })).toBeVisible();
+  await expect(storyTitle).toBeVisible();
+
+  // Pulling the handle up returns home too, then the story opens once more
+  const handle = page.getByText('Тяните вверх, чтобы вернуться');
+  const hb = (await handle.boundingBox())!;
+  await page.mouse.move(hb.x + hb.width / 2, hb.y);
+  await page.mouse.down();
+  await page.mouse.move(hb.x + hb.width / 2, hb.y - 40, { steps: 4 });
+  await page.mouse.move(hb.x + hb.width / 2, hb.y - 120, { steps: 4 });
+  await page.mouse.up();
+  await expect(storyTitle).toHaveCSS('opacity', '0');
+  await expect(page.getByText('Ооооострова с призами')).toBeVisible();
+  await page.getByRole('button', { name: /Аптека, зоомагазин, кафе и гипермаркеты/ }).click();
+  await expect(storyTitle).toBeVisible();
 
   // 2. Catalog
   await page.getByRole('button', { name: 'К товарам' }).click();

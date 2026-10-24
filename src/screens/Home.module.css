@@ -1,33 +1,122 @@
-/* Главная / A. Остров партнёров (371:10) */
+/*
+ * Главная / C. Фото партнёров (465:197) and Новость / C. История (465:280).
+ * `.story` switches the same layers into the story: the photo grows into the
+ * card, the main sheet drops down to the closed handle, texts swap in place.
+ */
+
+.screen {
+  --story-dur: 460ms;
+  transition: background-color var(--story-dur) var(--ease-out);
+}
+.story {
+  background: var(--bg-dark-pill);
+}
 
 .scroll {
   display: flex;
   flex-direction: column;
+  /* top of the closed sheet: 92 px above the bottom, sheet starts at 388 */
+  --sheet-closed: calc(var(--screen-h, 844px) - 92px - var(--safe-bottom) - 388px);
 }
-
-.hero {
-  position: relative;
-  flex: none;
-  height: 410px;
+.story .scroll {
   overflow: hidden;
 }
 
-.heroImage {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Hero keeps its 410 px in the flow, the card inside is placed against the scroll. */
+.hero {
+  flex: none;
+  height: 410px;
 }
 
-.scrim {
+.card {
   position: absolute;
   left: 0;
   right: 0;
-  top: 93px;
-  height: 317px;
-  background: linear-gradient(to bottom, rgba(43, 43, 46, 0), rgba(43, 43, 46, 0.62));
+  top: 0;
+  height: 410px;
+  overflow: hidden;
+  border-radius: 0;
+  transition:
+    top var(--story-dur) var(--ease-out),
+    height var(--story-dur) var(--ease-out),
+    border-radius var(--story-dur) var(--ease-out);
+}
+.story .card {
+  top: var(--statusbar-h);
+  height: calc(var(--screen-h, 844px) - var(--statusbar-h) - 104px - var(--safe-bottom));
+  border-radius: 32px;
+}
+
+.photo {
+  position: absolute;
+  left: 0;
+  top: -202px;
+  width: 100%;
+  height: 699px;
+  object-fit: cover;
+  transition:
+    top var(--story-dur) var(--ease-out),
+    height var(--story-dur) var(--ease-out);
+}
+.story .photo {
+  top: 0;
+  height: max(699px, 100%);
+}
+
+.scrimTop,
+.scrim,
+.scrimBottom {
+  position: absolute;
+  left: 0;
+  right: 0;
   pointer-events: none;
+  transition:
+    opacity var(--story-dur) var(--ease-out),
+    height var(--story-dur) var(--ease-out);
+}
+.scrimTop {
+  top: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, rgba(26, 20, 20, 0.45), rgba(26, 20, 20, 0));
+}
+.story .scrimTop {
+  height: 360px;
+  background: linear-gradient(to bottom, rgba(26, 18, 18, 0.62), rgba(26, 18, 18, 0));
+}
+.scrim {
+  top: 130px;
+  height: 286px;
+  background: linear-gradient(
+    to bottom,
+    rgba(31, 18, 18, 0),
+    rgba(31, 18, 18, 0.55) 45%,
+    rgba(31, 18, 18, 0.8)
+  );
+}
+.story .scrim {
+  opacity: 0;
+}
+.scrimBottom {
+  bottom: 0;
+  height: 160px;
+  background: linear-gradient(to bottom, rgba(31, 18, 18, 0), rgba(31, 18, 18, 0.45));
+  opacity: 0;
+}
+.story .scrimBottom {
+  opacity: 1;
+}
+
+/* Home layer: address, avatar, news title with «Смотреть», dots */
+.homeLayer {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 220ms var(--ease-out),
+    transform var(--story-dur) var(--ease-out);
+}
+.story .homeLayer {
+  opacity: 0;
+  transform: translateY(-24px);
 }
 
 .news {
@@ -39,9 +128,9 @@
 
 .newsTitle {
   position: absolute;
-  left: 16px;
-  top: 246px;
-  width: 330px;
+  left: 15px;
+  top: 253px;
+  width: 359px;
 }
 
 .newsCta {
@@ -108,16 +197,185 @@
   background: var(--bg-card);
 }
 
+/* Story layer: progress with close, label, title, subtitle, «К товарам» */
+.storyLayer {
+  position: absolute;
+  inset: 0;
+  color: var(--text-on-accent);
+  pointer-events: none;
+}
+.story .storyLayer {
+  pointer-events: auto;
+}
+
+.progress,
+.label,
+.storyTitle,
+.subtitle,
+.toCatalog {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+.story .progress,
+.story .label,
+.story .storyTitle,
+.story .subtitle,
+.story .toCatalog {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--story-dur) var(--ease-out),
+    transform var(--story-dur) var(--ease-out);
+}
+.story .progress { transition-delay: 120ms; }
+.story .label { transition-delay: 160ms; }
+.story .storyTitle { transition-delay: 200ms; }
+.story .subtitle { transition-delay: 240ms; }
+.story .toCatalog { transition-delay: 280ms; }
+
+.progress {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 18px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  transform: translateY(-12px);
+}
+.segment {
+  flex: 1 0 0;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+}
+.segmentFill {
+  display: block;
+  height: 100%;
+  background: var(--bg-card);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.story .segmentFill {
+  transform: none;
+  transition: transform 700ms var(--ease-out) 240ms;
+}
+.close {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(26, 18, 18, 0.35);
+  color: var(--text-on-accent);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.close:active {
+  transform: scale(0.92);
+}
+
+.label {
+  position: absolute;
+  left: 20px;
+  top: 92px;
+  width: 330px;
+  font: 500 17px/22px var(--font);
+  color: rgba(255, 255, 255, 0.92);
+}
+.storyTitle {
+  position: absolute;
+  left: 20px;
+  top: 122px;
+  width: 340px;
+  font: 700 30px/1.08 var(--font);
+}
+.subtitle {
+  position: absolute;
+  left: 20px;
+  top: 228px;
+  width: 330px;
+  font: 500 15px/19px var(--font);
+  color: rgba(255, 255, 255, 0.92);
+}
+.toCatalog {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+}
+.story .toCatalog:active {
+  transform: scale(0.98);
+}
+
+/* Main sheet; in the story it is the closed sheet at the bottom */
 .sheet {
   position: relative;
   flex: 1 0 auto;
   margin-top: -22px;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--bg-page);
+  transition:
+    transform var(--story-dur) var(--ease-out),
+    background-color var(--story-dur) var(--ease-out),
+    border-radius var(--story-dur) var(--ease-out);
+}
+.story .sheet {
+  transform: translateY(var(--sheet-closed));
+  border-radius: 32px 32px 0 0;
+  background: var(--bg-card);
+  cursor: grab;
+  touch-action: none;
+}
+
+.handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 14px;
+  gap: 13px;
+  opacity: 0;
+  transition: opacity 160ms var(--ease-out);
+  pointer-events: none;
+}
+.story .handle {
+  opacity: 1;
+  transition: opacity var(--story-dur) var(--ease-out) 160ms;
+}
+.chevron {
+  color: #8c8080;
+}
+.story .chevron {
+  animation: nudge-up 1.6s var(--ease-out) 900ms infinite;
+}
+@keyframes nudge-up {
+  0%, 60%, 100% { transform: none; }
+  30% { transform: translateY(-4px); }
+}
+.hint {
+  font: 500 15px/20px var(--font);
+  color: var(--text-secondary);
+}
+
+.sheetBody {
   display: flex;
   flex-direction: column;
   gap: var(--space-18);
   padding: var(--space-12) var(--space-12) calc(110px + var(--safe-bottom));
-  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
-  background: var(--bg-page);
+  transition: opacity 300ms var(--ease-out) 120ms;
+}
+.story .sheetBody {
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out);
 }
 
 .games {
@@ -199,7 +457,22 @@
   background: var(--bg-dark-pill);
   color: var(--text-on-accent);
   z-index: 5;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--story-dur) var(--ease-out);
 }
 .search:active {
   transform: translateX(-50%) scale(0.97);
+}
+.story .search {
+  opacity: 0;
+  transform: translateX(-50%) translateY(40px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .screen * {
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
 }

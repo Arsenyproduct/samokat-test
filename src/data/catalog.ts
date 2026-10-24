@@ -16,7 +16,7 @@ const asset = (path: string) => `${import.meta.env.BASE_URL}assets/${path}`;
 
 /** Images that are not products in the cart. */
 export const images = {
-  island: asset('island.jpg'),
+  partners: asset('partners.jpg'),
   bar: asset('products/bar.jpg'),
 };
 
