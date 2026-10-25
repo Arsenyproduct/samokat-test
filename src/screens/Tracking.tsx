@@ -136,7 +136,7 @@ export function Tracking() {
                 <Icon name="warn" size={20} className={s.warn} />
                 <span className="t-h3">{delayCopy.proposalTitle}</span>
               </p>
-              <p className="t-body-s">{delayCopy.proposalText(delay.tripsAfterMerge)}</p>
+              <p className="t-body-s">{delayCopy.proposalText}</p>
               <div className={s.actions}>
                 <Button height={52} onClick={() => setDelayDecision('merged')}>
                   {delayCopy.merge}

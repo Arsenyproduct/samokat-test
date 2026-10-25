@@ -59,8 +59,6 @@ export type Scenario = {
     joinRowId: string;
     /** How the remaining rows read after the split (frame 2.5). */
     rowUpdates: Record<string, Partial<Omit<TrackRow, 'id'>>>;
-    /** Trips left after merging, counted the way frame 2.5 counts them. */
-    tripsAfterMerge: number;
   };
 };
 
@@ -70,7 +68,7 @@ const px = (value: number) => value / 334;
 export const checkoutCopy = {
   title: 'Оформление',
   question: 'Как привезти?',
-  hint: 'Двигайте ползунок, рейсы и цена пересоберутся.',
+  hint: 'Двигайте ползунок – подберём лучший вариант доставки и рассчитаем её стоимость',
   arrivalsLabel: (count: number) => pluralArrivals(count),
   lastLabel: 'всё доедет',
   /** Самокат is the priority: the middle chip shows when it arrives. */
@@ -105,8 +103,8 @@ export const scenarios: Record<ScenarioId, Scenario> = {
     ],
     tracking: {
       // derived
-      title: 'Первым приедет Самокат через 10 минут',
-      subtitle: 'Дальше еАптека, Шоколадница с зоомагазином, потом Лента.',
+      title: 'Самокат приедет через 10 минут',
+      subtitle: 'Далее еАптека, Шоколадница, 4 лапы, Лента.',
       rows: [
         {
           id: 'samokat',
@@ -130,7 +128,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'evening',
-          doorTitle: 'Шоколадница с зоомагазином у двери',
+          doorTitle: 'Шоколадница и 4 лапы у двери',
           stores: shokoladnitsaAnd4lapy,
           logo: 'shokoladnitsa',
           time: '15:20',
@@ -154,7 +152,6 @@ export const scenarios: Record<ScenarioId, Scenario> = {
       rowUpdates: {
         evening: { stores: ['shokoladnitsa'], status: 'Готовим', doorTitle: 'Шоколадница у двери' },
       },
-      tripsAfterMerge: 3,
     },
   },
   balance: {
@@ -166,18 +163,18 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         id: 'first',
         time: '14:31',
         stores: ['eapteka', 'samokat'],
-        note: { text: 'Аптека едет с Самокатом', requires: ['eapteka', 'samokat'] },
+        note: { text: 'еАптека приедет с Самокатом', requires: ['eapteka', 'samokat'] },
       },
       { id: 'evening', time: '15:20', stores: shokoladnitsaAnd4lapy },
       { id: 'lenta', time: '17:30', stores: ['lenta'] },
     ],
     tracking: {
-      title: 'Первым приедет Самокат с аптекой через 15 минут',
-      subtitle: 'Дальше Шоколадница с зоомагазином, потом Лента.',
+      title: 'Самокат и еАптека приедут через 15 минут',
+      subtitle: 'Далее Шоколадница, 4 лапы, Лента.',
       rows: [
         {
           id: 'first',
-          doorTitle: 'Самокат с аптекой у двери',
+          doorTitle: 'Самокат и еАптека у двери',
           stores: ['eapteka', 'samokat'],
           logo: 'samokat',
           time: '14:31',
@@ -187,7 +184,7 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         },
         {
           id: 'evening',
-          doorTitle: 'Шоколадница с зоомагазином у двери',
+          doorTitle: 'Шоколадница и 4 лапы у двери',
           stores: shokoladnitsaAnd4lapy,
           logo: 'shokoladnitsa',
           time: '15:20',
@@ -212,7 +209,6 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         first: { status: 'Курьер в пути' },
         evening: { stores: ['shokoladnitsa'], status: 'Готовим', doorTitle: 'Шоколадница у двери' },
       },
-      tripsAfterMerge: 2,
     },
   },
   all: {
@@ -224,12 +220,12 @@ export const scenarios: Record<ScenarioId, Scenario> = {
         id: 'all',
         time: '17:30',
         stores: ['eapteka', 'samokat', 'shokoladnitsa', '4lapy', 'lenta'],
-        note: { text: 'Самокат тоже в 17:30. Нужно раньше? Сдвиньте влево', requires: ['samokat'] },
+        note: { text: 'Самокат и остальные заказы приедут в 17:30', requires: ['samokat'] },
       },
     ],
     tracking: {
       // derived
-      title: 'Всё приедет одним рейсом в 17:30',
+      title: 'Всё приедет одной доставкой в 17:30',
       rows: [
         {
           id: 'all',
@@ -269,30 +265,30 @@ export const editWindowMs = {
 /** Frames 4.1–4.4: change or cancel the order while a store has not started assembling. */
 export const editCopy = {
   title: 'Изменить заказ',
-  subtitle: 'Правки возможны, пока магазин не начал собирать свою часть.',
+  subtitle: 'Изменить заказ можно, пока магазин не начал сборку заказа.',
   actions: {
-    add: { title: 'Добавить товар', note: 'Откроется каталог. Товар уйдёт в магазин, который ещё не собрал заказ.' },
+    add: { title: 'Добавить товар', note: 'Добавьте то что забыли, пока магазин не начал собирать заказ' },
     remove: { title: 'Убрать товар', note: 'Деньги за него вернём на карту.' },
     amount: { title: 'Изменить количество', note: 'Больше или меньше, пока магазин не начал сборку.' },
-    cancel: { title: 'Отменить заказ', note: 'Только пока курьер не начал собирать. Потом отмена недоступна.' },
+    cancel: { title: 'Отменить заказ', note: 'Доступно, пока магазин не начал сборку' },
   },
-  statusTitle: 'Что ещё можно менять',
+  statusTitle: 'Что можно изменить',
   can: 'Можно',
   cannot: 'Нельзя',
   storeStatus: {
-    waiting: 'Ещё не взяли в сборку',
+    waiting: 'Скоро приступит к сборке',
     onTheWay: 'Курьер уже в пути',
     assembling: 'Собирают заказ',
     atDoor: 'Заказ у двери',
   },
   items: {
     title: 'Состав заказа',
-    subtitle: 'Меняйте только то, что ещё не собрано.',
+    subtitle: 'Меняйте то, что ещё не собрано.',
     canEdit: 'Можно изменить',
     locked: 'Уже собирают',
-    lockedNote: (names: string) => `${names} уже в сборке или в пути. Изменить их нельзя, добавьте нужное в следующий рейс.`,
-    refund: 'Вернём за убранное',
-    refundValue: (value: string) => `+ ${value} на карту`,
+    lockedNote: (names: string) => `${names} уже собирают заказ или в пути. Изменить заказы нельзя.`,
+    refund: 'Возврат за изменение',
+    refundValue: (value: string) => `Вернём ${value} на карту`,
     save: 'Сохранить изменения',
     pieces: (count: number) => `${count} шт`,
   },
@@ -305,7 +301,7 @@ export const editCopy = {
   },
   blocked: {
     title: 'Заказ уже собирают',
-    text: 'Отменить его целиком нельзя: курьер начал сборку. Можно добавить товары в следующий рейс или написать в поддержку.',
+    text: 'Отменить его целиком нельзя: курьер начал сборку или уже в пути. Оформите новый заказ или напишите в поддержку.',
     support: 'Написать в поддержку',
     supportNote: 'Чат поддержки в прототип не входит',
     back: 'Вернуться к заказу',
@@ -323,9 +319,9 @@ export const delayCopy = {
   afterMs: 6000,
   title: '4 лапы задерживаются',
   subtitle: 'Новый срок доставки 17:10, Лента приедет в 17:30.',
-  proposalTitle: 'Объединить рейсы?',
-  proposalText: (tripsLeft: number) =>
-    `4 лапы задерживаются и привезут игрушку только в 17:10. Можно объединить её с Лентой: всё приедет в 17:30, останется ${tripsLeft} ${pluralArrivals(tripsLeft)}, а доставка станет дешевле на 50 ₽.`,
+  proposalTitle: 'Объединить доставки?',
+  proposalText:
+    'Доставка из 4 лапы задерживается, заказ будет доставлен в 17:10. Можно объединить с Лентой: привезем всё в 17:30, доставка будет дешевле на 50₽.',
   merge: 'Объединить',
   keep: 'Оставить',
   delayedRow: {

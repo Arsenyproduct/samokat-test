@@ -160,7 +160,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
   await expectSkeletonThenContent(page);
   const slider = page.getByRole('slider', { name: 'Как привезти' });
   await expect(slider).toHaveAttribute('aria-valuetext', 'Стандарт');
-  await expect(page.getByText('Аптека едет с Самокатом')).toBeVisible();
+  await expect(page.getByText('еАптека приедет с Самокатом')).toBeVisible();
   await expect(page.getByText(price('2 164'))).toBeVisible();
   await shot('checkout-balance');
 
@@ -175,7 +175,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
 
   await page.keyboard.press('End');
   await expect(slider).toHaveAttribute('aria-valuetext', 'Всё сразу');
-  await expect(page.getByText('Самокат тоже в 17:30. Нужно раньше? Сдвиньте влево')).toBeVisible();
+  await expect(page.getByText('Самокат и остальные заказы приедут в 17:30')).toBeVisible();
   await expect(page.getByText(price('2 065'))).toBeVisible();
   await shot('checkout-all');
 
@@ -198,7 +198,7 @@ test('whole flow from home to the delay', async ({ page }, testInfo) => {
 
   // 7. Tracking
   await expectSkeletonThenContent(page);
-  await expect(page.getByRole('heading', { name: 'Первым приедет Самокат с аптекой через 15 минут' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Самокат и еАптека приедут через 15 минут' })).toBeVisible();
   await expect(page.getByText('Собираем и везём вместе')).toBeVisible();
   await shot('tracking');
 
@@ -261,7 +261,7 @@ test('change the order while stores have not started, then the button disappears
   await expect(change).toBeVisible();
   await change.click();
   await expect(page.getByRole('heading', { name: 'Изменить заказ' })).toBeVisible();
-  await expect(page.getByText('Что ещё можно менять')).toBeVisible();
+  await expect(page.getByText('Что можно изменить')).toBeVisible();
   await page.waitForTimeout(400);
   await page.screenshot({ path: `${dir}/20-edit.png` });
 
@@ -269,10 +269,10 @@ test('change the order while stores have not started, then the button disappears
   await page.getByRole('button', { name: /Убрать товар/ }).click();
   await expect(page.getByRole('heading', { name: 'Состав заказа' })).toBeVisible();
   await page.getByRole('button', { name: 'Убрать: Гречневая крупа Лента, 800 г' }).click();
-  await expect(page.getByText(/^\+\s119\s₽ на карту$/)).toBeVisible();
+  await expect(page.getByText(/^Вернём\s119\s₽ на карту$/)).toBeVisible();
   await page.screenshot({ path: `${dir}/21-edit-items.png` });
   await page.getByRole('button', { name: 'Сохранить изменения' }).click();
-  await expect(page.getByRole('heading', { name: /Первым приедет/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /приедут через/ })).toBeVisible();
   await expect(page.getByText('Лента', { exact: true })).toHaveCount(0);
 
   // Cancel is not possible: Самокат is already on its way
@@ -284,7 +284,7 @@ test('change the order while stores have not started, then the button disappears
   await expect(page.getByRole('heading', { name: 'Заказ уже собирают' })).toBeVisible();
   await page.screenshot({ path: `${dir}/23-cancel-blocked.png` });
   await page.getByRole('button', { name: 'Вернуться к заказу' }).click();
-  await expect(page.getByRole('heading', { name: /Первым приедет/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /приедут через/ })).toBeVisible();
 
   // The clock stood still on the change screens, so Шоколадница can still be changed
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
