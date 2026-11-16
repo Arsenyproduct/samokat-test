@@ -121,7 +121,7 @@ export function Product(props: Props) {
           {/* Content at (0,356), px20, gap14 */}
           <div className={s.content}>
             <div key={setMode ? 'set' : 'single'} className={`${s.swap} ${setMode ? s.swapSet : ''}`}>
-              <h2 className={s.title}>{setMode ? 'Snickers, 3 вкуса по цене 2' : productTitle(flavor)}</h2>
+              <h2 className={s.title}>{setMode ? '3 вкуса по цене 2' : productTitle(flavor)}</h2>
               <p className={s.weight}>{setMode ? '3 × 81 г' : '81 г'}</p>
               <div className={s.flavors}>
                 <p className={s.label}>{setMode ? 'Вкусы в наборе' : 'Вкус'}</p>

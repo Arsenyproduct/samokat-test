@@ -168,7 +168,7 @@ function SetRow({ set, onPick, onOpen, onQty }: SetRowProps) {
       </button>
       <div className={s.setInfo}>
         <button type="button" className={s.setTitle} onClick={onOpen}>
-          Snickers, 3 вкуса по цене 2
+          3 вкуса по цене 2
         </button>
         <div className={s.setFlavors}>
           {set.flavors.map((f, i) => (

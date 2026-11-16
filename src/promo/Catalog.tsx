@@ -12,7 +12,7 @@ const cards: Card[] = [
   { kind: 'single', flavor: 'bel' },
   { kind: 'set' },
   { kind: 'single', flavor: 'arahis' },
-  { kind: 'single', flavor: 'arahis' },
+  { kind: 'single', flavor: 'les' },
 ];
 
 type Props = {
@@ -82,7 +82,7 @@ export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
                 <div className={s.photo} />
                 <p className={s.name}>Шоколадный батончик Snickers, {flavors[card.flavor].lower}</p>
                 <p className={s.weight}>
-                  81 г · <span className={s.green}>Без лишних трат</span>
+                  81 г · <span className={s.green}>Любые вкусы</span>
                 </p>
                 <span className={s.chip}>
                   {rub(89)}
