@@ -1,0 +1,246 @@
+/* E1 · Каталог «Сладкое» (642:3734) */
+.screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-card);
+}
+
+.scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Grid at (11,120), 368 wide, gaps 16 / 8 */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 8px;
+  width: 368px;
+  margin-left: 11px;
+  padding: 120px 0 calc(110px + var(--safe-bottom));
+}
+
+/* Header stays on top while the grid scrolls under it */
+.header {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 108px;
+  background: var(--bg-card);
+}
+.back {
+  position: absolute;
+  left: 12px;
+  top: 52px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.back:active {
+  transform: scale(0.92);
+}
+.title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 60px;
+  text-align: center;
+  font: 700 20px/24px var(--font);
+  color: var(--text-primary);
+  pointer-events: none;
+}
+
+/* Card 180×287 */
+.card {
+  position: relative;
+  width: 180px;
+  height: 287px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 200ms var(--ease-out);
+}
+.card:has(.cardHit:active) {
+  transform: scale(0.97);
+}
+.cardHit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--radius-tile);
+}
+.photo {
+  flex: none;
+  width: 180px;
+  height: 180px;
+  border-radius: var(--radius-tile);
+  background: var(--bg-tile);
+}
+.name {
+  height: 34px;
+  overflow: hidden;
+  font: 500 13px/17px var(--font);
+  color: var(--text-primary);
+}
+.secondary {
+  color: var(--text-secondary);
+}
+.weight {
+  height: 17px;
+  overflow: hidden;
+  white-space: nowrap;
+  font: 500 13px/17px var(--font);
+  color: var(--text-secondary);
+}
+.green {
+  color: var(--state-green);
+}
+.invisible {
+  opacity: 0;
+}
+
+/* Chip/Add: red tint, 12/10 × 5, gap 6, Bold 15/22 + plus 16 */
+.chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-red-tint);
+  font: 700 15px/22px var(--font);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.chipPlus {
+  color: var(--brand-red);
+}
+
+/* Three bars of «3 любых вкуса» at (15,32), 151×126 */
+.setBars {
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  width: 151px;
+  height: 126px;
+  pointer-events: none;
+}
+
+/* Heart: white 30 circle at (142,8), 16 px glyph */
+.fav {
+  position: absolute;
+  z-index: 2;
+  left: 142px;
+  top: 8px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+}
+.fav:active {
+  transform: scale(0.88);
+}
+.favActive {
+  color: var(--brand-red);
+}
+
+/* Tag/Discount on the photo: h16, px8, Medium 8/16 */
+.tag {
+  position: absolute;
+  left: 11px;
+  top: 154px;
+  height: 16px;
+  width: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--link);
+  font: 500 8px/16px var(--font);
+  color: var(--text-on-accent);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.tagLeft10 {
+  left: 10px;
+}
+.tagDark {
+  width: 29px;
+  background: var(--tag-dark);
+}
+
+/* Search pill at (11,760) */
+.search {
+  position: absolute;
+  left: 11px;
+  bottom: calc(32px + var(--safe-bottom));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 26px 15px 24px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-dark-pill);
+  color: var(--text-on-accent);
+  font: 700 17px/22px var(--font);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.search:active {
+  transform: scale(0.96);
+}
+
+/* Cart FAB (360:142): red pill, price Bold 17/22 + «15 минут» 12/16 */
+.fab {
+  position: absolute;
+  right: 11px;
+  bottom: calc(31px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 24px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-red);
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  transform: scale(0.6);
+  pointer-events: none;
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 420ms var(--ease-spring);
+}
+.fabShown {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.fabShown:active {
+  transform: scale(0.95);
+  transition-duration: 120ms;
+}
+.fabPrice {
+  font: 700 17px/22px var(--font);
+  color: var(--text-on-accent);
+}
+.fabTime {
+  font: 500 12px/16px var(--font);
+  color: var(--brand-red-tint);
+}

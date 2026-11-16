@@ -6,6 +6,8 @@
 
 **Живая версия:** https://arsenyproduct.github.io/samokat-test/
 
+**Тестовое 2, «3 по цене 2»:** https://arsenyproduct.github.io/samokat-test/promo/ (код в `src/promo/`, экраны E1–E5 со страницы «Тестовое 2» в Figma)
+
 Сайт публикуется GitHub Actions из ветки `main` по адресу `https://<владелец>.github.io/<репозиторий>/`:
 путь берётся из имени репозитория автоматически. Если репозиторий называется иначе, ссылка меняется вместе с ним.
 

@@ -1,0 +1,261 @@
+/* E3 · Шторка набора: dim rgba(43,43,46,.55), #f2f2f2 sheet 606 high, r28 */
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+}
+.dim {
+  position: absolute;
+  inset: 0;
+  background: var(--dim);
+  opacity: 0;
+  transition: opacity 360ms var(--ease-out);
+}
+.shown .dim {
+  opacity: 1;
+}
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg-page);
+  transform: translateY(calc(100% + 20px));
+  transition:
+    transform var(--dur-sheet) var(--ease-sheet),
+    height var(--dur-sheet) var(--ease-sheet);
+  touch-action: none;
+  user-select: none;
+}
+.shown .sheet {
+  transform: none;
+}
+.clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* White grabber 64×5 at .5, 13 px above the sheet */
+.grabber {
+  position: absolute;
+  left: 163px;
+  top: -13px;
+  width: 64px;
+  height: 5px;
+  border-radius: 3px;
+  background: #fff;
+  opacity: 0.5;
+}
+
+/* Two pages: the positions and the replace list */
+.page {
+  position: absolute;
+  inset: 0;
+  transition:
+    transform 420ms var(--ease-sheet),
+    opacity 260ms var(--ease-out);
+}
+.pageOut {
+  transform: translateX(-28%);
+  opacity: 0;
+}
+.pageNext {
+  transform: translateX(28%);
+  opacity: 0;
+}
+
+.title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34px;
+  text-align: center;
+  font: 700 24px/30px var(--font);
+  color: var(--text-primary);
+}
+.subtitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 68px;
+  text-align: center;
+  font: 500 15px/19px var(--font);
+  color: var(--text-secondary);
+}
+
+/* Позиция: 358×112 white r20 at (16, 106 + 122·i) */
+.position {
+  position: absolute;
+  left: 16px;
+  width: 358px;
+  height: 112px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--bg-card);
+}
+.posPhoto {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--bg-tile);
+}
+.posName {
+  position: absolute;
+  left: 116px;
+  top: 12px;
+  width: 230px;
+  font: 500 14px/18px var(--font);
+  color: var(--text-primary);
+}
+.swapIn {
+  animation: swap-in 320ms var(--ease-out) both;
+}
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.replaceButton {
+  position: absolute;
+  left: 116px;
+  top: 63px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: var(--bg-tile);
+  font: 500 15px/19px var(--font);
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.replaceButton:active {
+  transform: scale(0.95);
+}
+/* «89 ₽» Bold 17 at (304,72); free: «89 ₽» 15 struck + «0 ₽» Bold 17 green */
+.posPrice {
+  position: absolute;
+  right: 16px;
+  top: 72px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+  font: 700 17px/22px var(--font);
+  color: var(--text-primary);
+}
+.posPrice s {
+  font: 500 15px/19px var(--font);
+  color: var(--text-secondary);
+}
+.posPriceFree b {
+  color: var(--state-green);
+}
+
+/* Add bar 390×96 at 510, pb24 */
+.primary {
+  position: absolute;
+  left: 0;
+  top: 510px;
+  width: 390px;
+  height: calc(96px + var(--safe-bottom));
+  padding-bottom: calc(24px + var(--safe-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-red);
+  font: 700 17px/22px var(--font);
+  color: var(--text-on-accent);
+  text-align: center;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+.primary:active {
+  background: var(--brand-red-pressed);
+}
+
+/* Replace row: 358×74 white r20 at (16, 14 + 86·i) */
+.row {
+  position: absolute;
+  left: 16px;
+  width: 358px;
+  height: 74px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--bg-card);
+  text-align: left;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.row:active {
+  transform: scale(0.98);
+}
+.rowPhoto {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--bg-tile);
+}
+.rowName {
+  position: absolute;
+  left: 75px;
+  top: 6px;
+  width: 230px;
+  font: 500 14px/18px var(--font);
+  color: var(--text-primary);
+}
+.rowPrice {
+  position: absolute;
+  left: 75px;
+  top: 54px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font: 500 12px/15px var(--font);
+  white-space: nowrap;
+}
+.rowPrice s {
+  color: var(--text-secondary);
+}
+.rowPrice b {
+  font-weight: 700;
+  color: var(--state-green);
+}
+.rowPrice .rowPricePaid {
+  color: var(--text-primary);
+}
+/* Radio 19: #d9d9d9 off, #ff335f with a white tick on */
+.radio {
+  position: absolute;
+  left: 319px;
+  top: 27px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  transition: background-color 200ms var(--ease-out);
+}
+.radio svg {
+  display: block;
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 160ms var(--ease-out),
+    transform 300ms var(--ease-spring);
+}
+.radioOn {
+  background: var(--brand-red);
+}
+.radioOn svg {
+  opacity: 1;
+  transform: none;
+}

@@ -1,0 +1,126 @@
+import { flavors, rub, type FlavorId } from './data';
+import { totals, useStore } from './store';
+import { Bar, Icons, Roll } from './ui';
+import s from './Catalog.module.css';
+
+type Card = { kind: 'single'; flavor: FlavorId } | { kind: 'set' };
+
+// E1 grid, in the order of the frame
+const cards: Card[] = [
+  { kind: 'single', flavor: 'les' },
+  { kind: 'single', flavor: 'arahis' },
+  { kind: 'single', flavor: 'bel' },
+  { kind: 'set' },
+  { kind: 'single', flavor: 'arahis' },
+  { kind: 'single', flavor: 'arahis' },
+];
+
+type Props = {
+  hidden: boolean;
+  onOpen: (flavor: FlavorId) => void;
+  onOpenSet: () => void;
+  onCart: () => void;
+};
+
+/** E1 · Каталог «Сладкое» (642:3734) */
+export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
+  const { state, dispatch } = useStore();
+  const t = totals(state);
+  // The cookie was in the cart before; the button shows up with the first Snickers, as E1 has none
+  const fabShown = t.items > 0 && (state.sets.length > 0 || state.singles.les + state.singles.arahis + state.singles.bel > 0);
+
+  const fav = (flavor: FlavorId | null) => {
+    const active = flavor !== null && state.favorites.includes(flavor);
+    return (
+      <button
+        type="button"
+        className={`${s.fav} ${active ? s.favActive : ''}`}
+        aria-label="В избранное"
+        aria-pressed={active}
+        onClick={() => flavor && dispatch({ type: 'favorite', flavor })}
+      >
+        <Icons.heartSmall size={16} />
+      </button>
+    );
+  };
+
+  return (
+    <section className={s.screen} aria-label="Сладкое" inert={hidden}>
+      <div className={s.scroll}>
+        <div className={s.grid}>
+          {cards.map((card, i) =>
+            card.kind === 'set' ? (
+              <article key={i} className={s.card}>
+                <button type="button" className={s.cardHit} onClick={onOpenSet} aria-label="3 любых вкуса, набор за 178 ₽" />
+                <div className={s.photo} />
+                <p className={s.name}>
+                  3 любых вкуса
+                  <br />
+                  <span className={s.secondary}>Если сложно определиться</span>
+                </p>
+                <p className={`${s.weight} ${s.invisible}`}>81 г · </p>
+                <span className={s.chip}>
+                  {rub(178)}
+                  <Icons.plus size={16} className={s.chipPlus} />
+                </span>
+                <span className={s.setBars}>
+                  <Bar flavor="arahis" left={0} top={0} boxW={150.662} boxH={60.053} w={146.574} h={42.507} rotate={7} />
+                  <Bar flavor="bel" left={0.47} top={36.18} boxW={149.721} boxH={55.12} w={146.574} h={42.507} rotate={-5} />
+                  <Bar flavor="les" left={0.37} top={69.88} boxW={149.926} boxH={56.122} w={146.574} h={42.507} rotate={5.4} />
+                </span>
+                {fav(null)}
+                <span className={`${s.tag} ${s.tagDark}`}>-33%</span>
+              </article>
+            ) : (
+              <article key={i} className={s.card}>
+                <button
+                  type="button"
+                  className={s.cardHit}
+                  onClick={() => onOpen(card.flavor)}
+                  aria-label={`Шоколадный батончик Snickers, ${flavors[card.flavor].lower}`}
+                />
+                <div className={s.photo} />
+                <p className={s.name}>Шоколадный батончик Snickers, {flavors[card.flavor].lower}</p>
+                <p className={s.weight}>
+                  81 г · <span className={s.green}>Без лишних трат</span>
+                </p>
+                <span className={s.chip}>
+                  {rub(89)}
+                  <Icons.plus size={16} className={s.chipPlus} />
+                </span>
+                <Bar flavor={card.flavor} left={6} top={66} boxW={168} boxH={49} w={168} h={49} rotate={0} />
+                {fav(card.flavor)}
+                <span className={`${s.tag} ${i === 2 ? s.tagLeft10 : ''}`}>3 по цене 2</span>
+              </article>
+            ),
+          )}
+        </div>
+      </div>
+
+      <header className={s.header}>
+        <button type="button" className={s.back} aria-label="Назад">
+          <Icons.back size={22} />
+        </button>
+        <h1 className={s.title}>Сладкое</h1>
+      </header>
+
+      <button type="button" className={s.search}>
+        <Icons.search size={22} />
+        <span>Поиск</span>
+      </button>
+
+      <button
+        type="button"
+        className={`${s.fab} ${fabShown ? s.fabShown : ''}`}
+        onClick={onCart}
+        aria-label={`Корзина, ${rub(t.items)}`}
+        inert={!fabShown}
+        aria-hidden={!fabShown || undefined}
+      >
+        <Roll value={rub(t.items)} className={s.fabPrice} />
+        <span className={s.fabTime}>15 минут</span>
+      </button>
+    </section>
+  );
+
+}
