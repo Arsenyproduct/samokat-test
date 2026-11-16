@@ -9,6 +9,8 @@ export type ProductView = {
   /** single: one flavour; set: the card turned into the set (E2 · Карточка набора) */
   mode: 'single' | 'set';
   setFlavors: FlavorId[];
+  /** The set came from the tray: its first bars are already in the cart */
+  pending?: boolean;
 };
 
 type Props = {
@@ -18,6 +20,8 @@ type Props = {
   onClose: () => void;
   onFlavor: (flavor: FlavorId) => void;
   onShowSet: () => void;
+  /** «+» on the third bar of the tray */
+  onCompleteTray: (flavor: FlavorId) => void;
   onEditSetFlavor: (index: number) => void;
   onAddSet: () => void;
   /** Tap on an empty cell of the tray */
@@ -29,7 +33,7 @@ type Props = {
  * в набор (654:159). Сценарий 2: «+» копит вкусы в лотке (651:914).
  */
 export function Product(props: Props) {
-  const { view: liveView, flying, onClose, onFlavor, onShowSet, onEditSetFlavor, onAddSet, onBuildSet } = props;
+  const { view: liveView, flying, onClose, onFlavor, onShowSet, onCompleteTray, onEditSetFlavor, onAddSet, onBuildSet } = props;
   const { mounted, shown } = usePresence(liveView !== null, 480);
   const view = useLatest(liveView);
   const { state, dispatch } = useStore();
@@ -66,6 +70,13 @@ export function Product(props: Props) {
   // Tray: the bars added towards the next free one (two cells filled, the third is 0 ₽)
   const rest = state.units.length % 3;
   const trayOpen = !setMode && rest > 0;
+  // With two bars in the tray the next «+» completes the set instead of adding a single
+  const plus = () => (rest === 2 ? onCompleteTray(flavor) : dispatch({ type: 'single', flavor, delta: 1 }));
+
+  // On the photo the bar of this card stays in the middle, the other two slide out
+  const mid = setMode && !setFlavors.includes(flavor) ? setFlavors[0]! : flavor;
+  const others = [...setFlavors];
+  others.splice(others.indexOf(mid) >= 0 ? others.indexOf(mid) : 0, 1);
 
   const sheetStyle = drag.dragging
     ? { transform: `translateY(${drag.dy}px)`, transition: 'none' }
@@ -91,9 +102,9 @@ export function Product(props: Props) {
               />
             ))}
             <div className={s.bars} aria-hidden="true">
-              <img key={`t-${setFlavors[2]}`} className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" draggable={false} />
-              <img key={`b-${setFlavors[1]}`} className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" draggable={false} />
-              <img key={`m-${setMode ? setFlavors[0] : flavor}`} className={`${s.heroBar} ${s.barMid}`} src={img.bar(setMode ? setFlavors[0]! : flavor)} alt="" draggable={false} />
+              <img key={`t-${others[1]}`} className={`${s.heroBar} ${s.barTop}`} src={img.bar(others[1]!)} alt="" draggable={false} />
+              <img key={`b-${others[0]}`} className={`${s.heroBar} ${s.barBottom}`} src={img.bar(others[0]!)} alt="" draggable={false} />
+              <img key={`m-${mid}`} className={`${s.heroBar} ${s.barMid}`} src={img.bar(mid)} alt="" draggable={false} />
             </div>
           </div>
 
@@ -179,7 +190,7 @@ export function Product(props: Props) {
             className={s.addSimple}
             tabIndex={stepper ? -1 : 0}
             disabled={flying}
-            onClick={() => (setMode ? onAddSet() : dispatch({ type: 'single', flavor, delta: 1 }))}
+            onClick={() => (setMode ? onAddSet() : plus())}
           >
             <Roll value={setMode ? `Добавить за ${rub(SET_PRICE)}` : rub(PRICE)} />
             <svg className={`${s.addPlus} ${setMode ? s.addPlusHidden : ''}`} width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
@@ -203,7 +214,7 @@ export function Product(props: Props) {
                 type="button"
                 className={`${s.stepButton} ${s.stepPlus}`}
                 aria-label="Добавить ещё"
-                onClick={() => dispatch({ type: 'single', flavor, delta: 1 })}
+                onClick={plus}
               >
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path d="M13 5.42V20.58M5.42 13H20.58" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -217,9 +228,9 @@ export function Product(props: Props) {
         {flying && (
           <div className={`${s.ghost} ${s.setMode}`} style={{ ['--fly-y' as string]: `${flyY}px` }} aria-hidden="true">
             <div className={s.bars}>
-              <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" />
-              <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" />
-              <img className={`${s.heroBar} ${s.barMid}`} src={img.bar(setFlavors[0]!)} alt="" />
+              <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(others[1]!)} alt="" />
+              <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(others[0]!)} alt="" />
+              <img className={`${s.heroBar} ${s.barMid}`} src={img.bar(mid)} alt="" />
             </div>
           </div>
         )}

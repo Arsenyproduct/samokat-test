@@ -140,5 +140,42 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
   await expect(cart.getByText(nb('251 ₽'))).toBeVisible();
   await shot('cart-two-sets');
 
+  const closeCart = async () => {
+    await cart.locator('xpath=..').locator('[class*=backdrop]').click({ position: { x: 100, y: 10 } });
+    await expect(cart).toHaveCount(0);
+  };
+  const setRows = cart.getByText('Snickers, 3 вкуса по цене 2');
+
+  // The tray counts any flavours; the third «+» turns the card into the set
+  await closeCart();
+  await page.getByRole('button', { name: 'Шоколадный батончик Snickers, белый' }).first().click();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await page.getByRole('button', { name: 'Лесной орех', exact: true }).click();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await page.getByRole('button', { name: 'Больше арахиса', exact: true }).click();
+  await expect(page.getByText('Ещё 1, и он за 0 ₽')).toBeVisible();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Snickers, 3 вкуса по цене 2' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Заменить «Больше арахиса»' })).toBeVisible();
+  await page.waitForTimeout(1200);
+  await shot('tray-to-set');
+  await page.getByRole('button', { name: nb('Добавить за 178 ₽') }).click();
+  await expect(cart).toBeVisible({ timeout: 3000 });
+  await expect(setRows).toHaveCount(3);
+  await expect(cart.locator('[data-open="true"] [class*=rowName]')).toHaveCount(0);
+
+  // Any three bars in the cart become a set by themselves
+  await closeCart();
+  await page.getByRole('button', { name: 'Шоколадный батончик Snickers, лесной орех' }).first().click();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await page.getByRole('button', { name: 'Закрыть' }).click();
+  await page.getByRole('button', { name: /^Корзина/ }).click();
+  await expect(cart.locator('[data-open="true"] [class*=rowName]')).toHaveCount(1);
+  await cart.getByRole('button', { name: 'Добавить: Лесной орех' }).click();
+  await cart.getByRole('button', { name: 'Добавить: Лесной орех' }).click();
+  await expect(setRows).toHaveCount(4);
+  await expect(cart.locator('[data-open="true"] [class*=rowName]')).toHaveCount(0);
+  await shot('cart-auto-set');
+
   expect(problems).toEqual([]);
 });

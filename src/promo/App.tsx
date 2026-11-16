@@ -45,13 +45,15 @@ function Flow({ phone }: { phone: boolean }) {
     later(() => setCartOpen(true), TO_CART);
   };
 
-  /** Сценарий 1: «Добавить за 178 ₽» on the set card */
+  /** «Добавить за 178 ₽» on the set card: a new set, or the bars of the tray with the third */
   const addFromCard = () => {
     if (!product || flying) return;
     const flavors = product.setFlavors;
+    const take = product.pending ? state.units.length : 0;
     setFlying(true);
     later(() => {
-      dispatch({ type: 'addSet', id: nextId(), flavors });
+      if (take > 0) dispatch({ type: 'merge', id: nextId(), flavors, take });
+      else dispatch({ type: 'addSet', id: nextId(), flavors });
       setFlying(false);
       toCart();
     }, FLIGHT);
@@ -95,7 +97,11 @@ function Flow({ phone }: { phone: boolean }) {
           setSheet(null);
         }}
         onFlavor={(flavor) => setProduct((p) => (p ? { ...p, flavor, setFlavors: defaultSet(flavor) } : p))}
-        onShowSet={() => setProduct((p) => (p ? { ...p, mode: 'set' } : p))}
+        onShowSet={() => setProduct((p) => (p ? { ...p, mode: 'set', pending: false } : p))}
+        onCompleteTray={(flavor) =>
+          // The third bar: the card turns into the set of the tray bars and this one (it is the free one)
+          setProduct((p) => (p ? { ...p, mode: 'set', pending: true, setFlavors: [...state.units, flavor] } : p))
+        }
         onEditSetFlavor={(index) => {
           if (!product) return;
           setSheetSetId(null);

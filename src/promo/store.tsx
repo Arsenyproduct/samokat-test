@@ -7,6 +7,8 @@ export type State = {
   singles: Record<FlavorId, number>;
   /** Single bars in the order they were added: the tray of the card shows the last ones */
   units: FlavorId[];
+  /** Ids of the sets that three single bars made by themselves */
+  autoSeq: number;
   sets: CartSet[];
   leaveAtDoor: boolean;
   forOther: boolean;
@@ -27,6 +29,7 @@ type Action =
 const initial: State = {
   singles: { les: 0, arahis: 0, bel: 0 },
   units: [],
+  autoSeq: 0,
   sets: [],
   leaveAtDoor: true,
   forOther: false,
@@ -39,10 +42,23 @@ function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'single': {
       if (action.delta > 0) {
+        const units = [...state.units, action.flavor];
+        // Any three bars are the set: they leave the single rows and become one set row
+        if (units.length === 3) {
+          const singles = { ...state.singles };
+          state.units.forEach((f) => (singles[f] -= 1));
+          return {
+            ...state,
+            singles,
+            units: [],
+            autoSeq: state.autoSeq + 1,
+            sets: [...state.sets, { id: `auto-${state.autoSeq + 1}`, flavors: units, qty: 1 }],
+          };
+        }
         return {
           ...state,
           singles: { ...state.singles, [action.flavor]: state.singles[action.flavor] + 1 },
-          units: [...state.units, action.flavor],
+          units,
         };
       }
       const at = state.units.lastIndexOf(action.flavor);
