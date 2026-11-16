@@ -54,7 +54,8 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
   };
 
   const style = {
-    height: `calc(${height}px + var(--safe-bottom))`,
+    // Short screens: the sheet stops under the status bar and its list scrolls
+    height: `min(calc(${height}px + var(--safe-bottom)), calc(100% - 60px))`,
     ...(drag.dy > 0 ? { transform: `translateY(${drag.dy}px)` } : null),
     ...(drag.dragging ? { transition: 'none' } : null),
   };
@@ -70,6 +71,8 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
         <div className={s.clip}>
         {/* Positions */}
         <div className={`${s.page} ${replace ? s.pageOut : ''}`} inert={replace}>
+          <div className={s.cards}>
+          <div className={s.cardsInner}>
           <p className={s.title}>Snickers: 3 вкуса</p>
           <p className={s.subtitle}>Третий за 0 ₽</p>
           {sheet.flavors.map((f, i) => (
@@ -95,6 +98,8 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
               )}
             </div>
           ))}
+          </div>
+          </div>
           <button type="button" className={s.primary} onClick={onPrimary}>
             {sheet.context === 'new' ? `Добавить за ${rub(SET_PRICE)}` : 'Вернуться в корзину'}
           </button>

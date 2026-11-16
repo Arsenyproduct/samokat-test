@@ -51,6 +51,11 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
   const dialog = page.getByRole('dialog', { name: 'Шоколадный батончик Snickers, лесной орех' });
   await expect(dialog).toBeVisible();
   await shot('product');
+  // The card scrolls down to the details
+  await page.getByRole('heading', { name: 'Состав', exact: true }).scrollIntoViewIfNeeded();
+  await expect(page.getByText('В 100 граммах')).toBeVisible();
+  await shot('product-details');
+  await page.getByRole('heading', { name: 'Описание', exact: true }).evaluate((el) => el.closest('[class*=scroll]')?.scrollTo({ top: 0 }));
 
   // Flavour chips switch the photo and the title
   await dialog.getByRole('button', { name: 'Белый', exact: true }).click();
@@ -101,23 +106,30 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
 
   await page.getByRole('button', { name: 'Закрыть' }).click();
   const cartButton = page.getByRole('button', { name: /^Корзина/ });
-  await expect(cartButton).toHaveAccessibleName(nb('Корзина, 293 ₽'));
+  await expect(cartButton).toHaveAccessibleName(nb('Корзина, 178 ₽'));
   await shot('catalog-cart-button');
 
-  // E4: cart
+  // E4: cart, bonuses off by default
   await cartButton.click();
   const cart = page.getByRole('dialog', { name: 'Корзина' });
   await expect(cart.getByText('Snickers, 3 вкуса по цене 2')).toBeVisible();
-  await expect(cart.getByText(nb('Итого, со скидкой 243 ₽'))).toBeVisible();
-  await expect(cart.getByText(nb('188 ₽'))).toBeVisible();
+  await expect(cart.getByRole('switch', { name: 'СберСпасибо' })).toHaveAttribute('aria-checked', 'false');
+  await expect(cart.getByText(nb('Итого, со скидкой 89 ₽'))).toBeVisible();
+  await expect(cart.getByText(nb('227 ₽'))).toBeVisible();
+  // The old price is grey and struck through
+  const old = cart.getByText(nb('267 ₽')).first();
+  await expect(old).toHaveCSS('text-decoration-line', 'line-through');
+  await expect(old).toHaveCSS('color', 'rgb(154, 154, 158)');
   await shot('cart');
 
-  // E5: replace a flavour right in the row
-  await cart.getByRole('button', { name: 'Белый', exact: true }).first().click();
-  await expect(cart.getByText('Заменить «Белый» на')).toBeVisible();
+  // A flavour chip opens the replace list as a popup
+  await cart.getByRole('button', { name: 'Заменить «Белый»' }).click();
+  const popup = page.getByRole('dialog', { name: 'Snickers: 3 вкуса' });
+  await expect(popup.getByRole('button', { name: /больше арахиса/ })).toBeVisible();
   await shot('cart-replace');
-  await cart.getByRole('button', { name: 'Больше арахиса', exact: true }).last().click();
-  await expect(cart.getByText('Заменить «Белый» на')).toBeHidden();
+  await popup.getByRole('button', { name: /больше арахиса/ }).click();
+  await expect(popup).toHaveCount(0);
+  await expect(cart.getByRole('button', { name: 'Заменить «Больше арахиса»' })).toBeVisible();
 
   // The set sheet over the cart
   await cart.getByRole('button', { name: 'Открыть набор' }).click();
@@ -129,11 +141,11 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
 
   // Quantities and the total
   await cart.getByRole('button', { name: 'Добавить: набор Snickers' }).click();
-  await expect(cart.getByText(nb('Итого, со скидкой 332 ₽'))).toBeVisible();
-  await cart.getByRole('button', { name: 'Убрать: Печенье' }).click();
-  await expect(cart.getByText(nb('251 ₽'))).toBeVisible();
-  await cart.getByRole('switch', { name: 'СберСпасибо' }).click();
+  await expect(cart.getByText(nb('Итого, со скидкой 178 ₽'))).toBeVisible();
   await expect(cart.getByText(nb('405 ₽'))).toBeVisible();
+  await cart.getByRole('switch', { name: 'СберСпасибо' }).click();
+  await expect(cart.getByText(nb('Итого, со скидкой 332 ₽'))).toBeVisible();
+  await expect(cart.getByText(nb('251 ₽'))).toBeVisible();
   await shot('cart-changed');
 
   expect(problems).toEqual([]);

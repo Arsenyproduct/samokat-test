@@ -159,11 +159,28 @@
   color: var(--state-green);
 }
 
+/* Title and positions scroll above the add bar when the screen is short */
+.cards {
+  position: absolute;
+  inset: 0 0 calc(96px + var(--safe-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+}
+.cards::-webkit-scrollbar {
+  display: none;
+}
+.cardsInner {
+  position: relative;
+  height: 474px;
+}
+
 /* Add bar 390×96 at 510, pb24 */
 .primary {
   position: absolute;
   left: 0;
-  top: 510px;
+  bottom: 0;
   width: 390px;
   height: calc(96px + var(--safe-bottom));
   padding-bottom: calc(24px + var(--safe-bottom));

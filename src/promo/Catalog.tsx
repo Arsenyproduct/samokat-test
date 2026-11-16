@@ -26,8 +26,8 @@ type Props = {
 export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
   const { state, dispatch } = useStore();
   const t = totals(state);
-  // The cookie was in the cart before; the button shows up with the first Snickers, as E1 has none
-  const fabShown = t.items > 0 && (state.sets.length > 0 || state.singles.les + state.singles.arahis + state.singles.bel > 0);
+  // The cart button shows up with the first Snickers (E1 has none)
+  const fabShown = t.items > 0;
 
   const fav = (flavor: FlavorId | null) => {
     const active = flavor !== null && state.favorites.includes(flavor);

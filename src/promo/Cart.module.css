@@ -151,18 +151,11 @@
   overflow: hidden;
 }
 
-/* ---------- Набор · строка корзины ---------- */
-.setWrap {
-  display: flex;
-  flex-direction: column;
-}
+/* ---------- Набор · строка корзины: gap12, items-end ---------- */
 .setRow {
   display: flex;
   align-items: flex-end;
   gap: 12px;
-}
-.setRowEditing {
-  align-items: flex-start;
 }
 .setThumb {
   position: relative;
@@ -199,11 +192,11 @@
   gap: 6px;
   width: 184px;
 }
-/* Flavour chip 12px, px8 py4; while editing the dots show and the picked one darkens */
+/* Flavour chip 12px, px8 py4; a tap opens the replace list */
 .flavorChip {
   display: inline-flex;
   align-items: center;
-  gap: 0;
+  gap: 5px;
   padding: 4px 8px;
   border-radius: 999px;
   background: var(--bg-tile);
@@ -212,32 +205,14 @@
   white-space: nowrap;
   transition:
     background-color 220ms var(--ease-out),
-    color 220ms var(--ease-out),
-    gap 260ms var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
 .flavorChip:active {
   transform: scale(0.94);
-}
-.flavorDot {
-  flex: none;
-  width: 0;
-  height: 8px;
-  border-radius: 4px;
-  transition: width 260ms var(--ease-out);
-}
-.setRowEditing .flavorChip {
-  gap: 5px;
-}
-.setRowEditing .flavorDot {
-  width: 8px;
-}
-.flavorChipOn {
-  background: var(--bg-dark-pill);
-  color: var(--text-on-accent);
+  background: var(--line-divider);
 }
 .flavorName {
-  animation: name-in 300ms var(--ease-out) both;
+  animation: name-in 320ms var(--ease-out) both;
 }
 @keyframes name-in {
   from {
@@ -245,14 +220,10 @@
   }
 }
 .free {
-  margin-left: 5px;
   font-weight: 700;
   color: var(--state-green);
 }
-.setRowEditing .free {
-  margin-left: 0;
-}
-/* E4: «267 ₽» SemiBold 15 struck + «178 ₽» Bold 17 in a row */
+/* «267 ₽» SemiBold 15 grey struck + «178 ₽» Bold 17 */
 .setPrice {
   flex: none;
   display: flex;
@@ -262,79 +233,12 @@
   font: 700 17px/22px var(--font);
   color: var(--text-primary);
 }
-.setPrice b {
-  font-weight: 700;
-}
-.struck {
+/* The rolling number is an inline grid, so the line goes on its items too */
+.struck,
+.struck * {
   font: 600 15px/19px var(--font);
   color: var(--text-secondary);
   text-decoration: line-through;
-}
-/* E5: «178 ₽» over «267 ₽» Medium 13 */
-.setRowEditing .setPrice {
-  flex-direction: column-reverse;
-  align-items: flex-end;
-  gap: 2px;
-}
-.setRowEditing .setPrice .struck {
-  font: 500 13px/17px var(--font);
-}
-
-.replaceWrap {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 380ms var(--ease-sheet),
-    opacity 220ms var(--ease-out);
-}
-.replaceOpen {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-.replaceInner {
-  min-height: 0;
-  overflow: hidden;
-}
-.replace {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 16px;
-  background: var(--bg-tile);
-}
-.replaceTitle {
-  font: 500 13px/17px var(--font);
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-.replaceChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  width: 312px;
-}
-.replaceChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--bg-card);
-  font: 500 14px/18px var(--font);
-  color: var(--text-primary);
-  white-space: nowrap;
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-.replaceChip:active {
-  transform: scale(0.95);
-}
-.replaceDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
 }
 
 /* ---------- Cart row (DS 360:158): photo 72 r14, gap12, items-end ---------- */
@@ -344,7 +248,7 @@
   justify-content: center;
   gap: 12px;
 }
-.cookie,
+
 .rowTile {
   position: relative;
   flex: none;
@@ -379,9 +283,6 @@
   font: 700 17px/22px var(--font);
   color: var(--text-primary);
   white-space: nowrap;
-}
-.rowPrice .struck {
-  line-height: 22px;
 }
 .struckHidden {
   display: none;

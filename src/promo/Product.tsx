@@ -1,6 +1,7 @@
-import { flavorList, flavorOrder, flavors, img, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { details, facts, flavorList, flavorOrder, flavors, img, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
 import { singlesTotals, useStore } from './store';
-import { Icons, Roll, SetThumb104, useDragToClose, useLatest, usePresence } from './ui';
+import { Icons, Roll, SetThumb104, useLatest, usePresence, useScrollSheetDrag } from './ui';
 import s from './Product.module.css';
 
 export type ProductView = {
@@ -29,7 +30,26 @@ export function Product(props: Props) {
   const { mounted, shown } = usePresence(liveView !== null, 480);
   const view = useLatest(liveView);
   const { state, dispatch } = useStore();
-  const drag = useDragToClose(onClose);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const drag = useScrollSheetDrag(sheetRef, scrollRef, onClose, mounted);
+  const isSet = view?.mode === 'set';
+
+  // The set takes shape on the photo, so the card scrolls back to the top
+  useEffect(() => {
+    if (isSet) scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [isSet]);
+  // A new product opens from the top
+  useLayoutEffect(() => {
+    if (liveView === null) return;
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [liveView === null]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The flight ends on the add bar, whatever the screen height
+  const [flyY, setFlyY] = useState(554);
+  useLayoutEffect(() => {
+    if (flying && sheetRef.current) setFlyY(sheetRef.current.clientHeight - 96 + 36 - 182);
+  }, [flying]);
 
   if (!mounted || !view) return null;
 
@@ -60,7 +80,8 @@ export function Product(props: Props) {
   return (
     <div className={`${s.layer} ${shown ? s.shown : ''}`} inert={!liveView}>
       <div className={s.backdrop} onClick={onClose} />
-      <div className={s.sheet} style={sheetStyle} {...drag.handlers} role="dialog" aria-label={setMode ? 'Набор Snickers' : productTitle(flavor)}>
+      <div ref={sheetRef} className={s.sheet} style={sheetStyle} role="dialog" aria-label={setMode ? 'Набор Snickers' : productTitle(flavor)}>
+        <div ref={scrollRef} className={s.scroll}>
         {/* Photo 370×330 at (10,10), r22 */}
         <div className={`${s.photo} ${setMode ? s.setMode : ''}`}>
           {flavorOrder.map((f) => (
@@ -98,9 +119,10 @@ export function Product(props: Props) {
               <div className={s.chips}>
                 {setMode
                   ? setFlavors.map((f, i) => (
-                      <button key={i} type="button" className={`${s.chip} ${s.chipDot}`} onClick={() => onEditSetFlavor(i)}>
-                        <span className={s.dot} style={{ background: flavors[f].dot }} />
-                        {flavors[f].name}
+                      <button key={i} type="button" className={s.chip} onClick={() => onEditSetFlavor(i)}>
+                        <span key={f} className={s.chipName}>
+                          {flavors[f].name}
+                        </span>
                       </button>
                     ))
                   : [
@@ -146,6 +168,8 @@ export function Product(props: Props) {
               <div className={s.divider} />
             </div>
           </div>
+                  <Details setMode={setMode} flavor={flavor} setFlavors={setFlavors} />
+        </div>
         </div>
 
         {/* Add bar, #ff335f, h96 at 700 */}
@@ -204,7 +228,7 @@ export function Product(props: Props) {
 
         {/* The set leaves the photo for the add bar */}
         {flying && (
-          <div className={`${s.ghost} ${s.setMode}`} aria-hidden="true">
+          <div className={`${s.ghost} ${s.setMode}`} style={{ ['--fly-y' as string]: `${flyY}px` }} aria-hidden="true">
             <div className={s.bars}>
               <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[1]!)} alt="" />
               <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[2]!)} alt="" />
@@ -240,5 +264,71 @@ function Tooltip({ open, onClose }: { open: boolean; onClose: () => void }) {
         <path d="M0 0H18L11.83 6.17C10.27 7.73 7.73 7.73 6.17 6.17L0 0Z" fill="currentColor" />
       </svg>
     </div>
+  );
+}
+
+/** Below the fold: nutrition, description, composition and facts */
+function Details({ setMode, flavor, setFlavors }: { setMode: boolean; flavor: FlavorId; setFlavors: FlavorId[] }) {
+  if (setMode) {
+    return (
+      <div key="set" className={`${s.details} ${s.swap} ${s.swapSet}`}>
+        <div className={s.divider} />
+        <section className={s.section}>
+          <h3 className={s.h3}>Описание</h3>
+          <p className={s.text}>Три батончика Snickers по 81 г. Вкусы меняются до оформления заказа.</p>
+        </section>
+        {setFlavors.map((f, i) => (
+          <section key={`${i}-${f}`} className={s.section}>
+            <h3 className={s.h3}>Состав: {flavors[f].lower}</h3>
+            <p className={s.text}>{details[f].composition}</p>
+          </section>
+        ))}
+        <Facts />
+      </div>
+    );
+  }
+  const d = details[flavor];
+  const n = d.nutrition;
+  return (
+    <div key={flavor} className={`${s.details} ${s.swap}`}>
+      <section className={s.section}>
+        <p className={s.label}>В 100 граммах</p>
+        <div className={s.nutrition}>
+          {[
+            [n.kcal, 'ккал'],
+            [n.protein, 'белки'],
+            [n.fat, 'жиры'],
+            [n.carbs, 'углеводы'],
+          ].map(([value, label]) => (
+            <div key={label} className={s.nutrient}>
+              <b>{String(value).replace('.', ',')}</b>
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className={s.section}>
+        <h3 className={s.h3}>Описание</h3>
+        <p className={s.text}>{d.about}</p>
+      </section>
+      <section className={s.section}>
+        <h3 className={s.h3}>Состав</h3>
+        <p className={s.text}>{d.composition}</p>
+      </section>
+      <Facts />
+    </div>
+  );
+}
+
+function Facts() {
+  return (
+    <dl className={s.facts}>
+      {facts.map(([term, value]) => (
+        <div key={term} className={s.fact}>
+          <dt>{term}</dt>
+          <dd>{value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

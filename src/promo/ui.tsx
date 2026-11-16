@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import { img, type FlavorId } from './data';
 import s from './ui.module.css';
 
@@ -277,4 +277,92 @@ function deviceScale(el: Element) {
   const device = el.closest('[data-device]') as HTMLElement | null;
   if (!device) return 1;
   return device.getBoundingClientRect().width / device.offsetWidth || 1;
+}
+
+/**
+ * Pull-to-close for a sheet whose content scrolls: the drag starts only when the
+ * content is at the top and the finger moves down; otherwise the content scrolls.
+ * Native listeners, because touchmove must be cancelable.
+ */
+export function useScrollSheetDrag(
+  sheet: RefObject<HTMLElement | null>,
+  scroller: RefObject<HTMLElement | null>,
+  onClose: () => void,
+  active: boolean,
+) {
+  const [dy, setDy] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const close = useRef(onClose);
+  close.current = onClose;
+
+  useEffect(() => {
+    const el = sheet.current;
+    const sc = scroller.current;
+    if (!active || !el || !sc) return;
+    let start: { y: number; t: number } | null = null;
+    let on = false;
+    let last = 0;
+    const begin = (y: number) => {
+      start = { y, t: performance.now() };
+      on = false;
+    };
+    const move = (y: number, e: Event) => {
+      if (!start) return;
+      const d = (y - start.y) / deviceScale(el);
+      if (!on) {
+        if (sc.scrollTop <= 0 && d > 8) {
+          on = true;
+          setDragging(true);
+        } else if (d < -4 || sc.scrollTop > 0) {
+          start = null;
+          return;
+        } else return;
+      }
+      if (e.cancelable) e.preventDefault();
+      last = Math.max(0, d);
+      setDy(last);
+    };
+    const end = () => {
+      if (!start) return;
+      const wasOn = on;
+      const v = last / Math.max(1, performance.now() - start.t);
+      start = null;
+      on = false;
+      if (!wasOn) return;
+      setDragging(false);
+      setDy(0);
+      if (last > 110 || (v > 0.6 && last > 30)) close.current();
+      // The release must not click whatever is under the finger
+      const stop = (ev: Event) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+      };
+      el.addEventListener('click', stop, { capture: true, once: true });
+      window.setTimeout(() => el.removeEventListener('click', stop, { capture: true }), 50);
+    };
+    const ts = (e: TouchEvent) => begin(e.touches[0]!.clientY);
+    const tm = (e: TouchEvent) => move(e.touches[0]!.clientY, e);
+    const md = (e: MouseEvent) => {
+      if (e.button === 0) begin(e.clientY);
+    };
+    const mm = (e: MouseEvent) => move(e.clientY, e);
+    el.addEventListener('touchstart', ts, { passive: true });
+    el.addEventListener('touchmove', tm, { passive: false });
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+    el.addEventListener('mousedown', md);
+    window.addEventListener('mousemove', mm);
+    window.addEventListener('mouseup', end);
+    return () => {
+      el.removeEventListener('touchstart', ts);
+      el.removeEventListener('touchmove', tm);
+      el.removeEventListener('touchend', end);
+      el.removeEventListener('touchcancel', end);
+      el.removeEventListener('mousedown', md);
+      window.removeEventListener('mousemove', mm);
+      window.removeEventListener('mouseup', end);
+    };
+  }, [sheet, scroller, active]);
+
+  return { dy, dragging };
 }

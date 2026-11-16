@@ -6,7 +6,7 @@ import { Product, type ProductView } from './Product';
 import { SetSheet, type SetSheetView } from './SetSheet';
 import { Cart } from './Cart';
 import { StatusBar } from './ui';
-import stage from '../App.module.css';
+import stage from './Stage.module.css';
 
 const DEVICE_W = 390;
 const DEVICE_H = 844;
@@ -16,7 +16,7 @@ const SHEET_AWAY = 240; // the set sheet slides down
 const SPREAD = 880; // two bars slide out from under the middle one
 const FLIGHT = 560; // the set flies into the add bar
 
-function Flow() {
+function Flow({ phone }: { phone: boolean }) {
   const { state, dispatch } = useStore();
   const [product, setProduct] = useState<ProductView | null>(null);
   const [sheet, setSheet] = useState<SetSheetView | null>(null);
@@ -108,6 +108,12 @@ function Flow() {
       <Cart
         open={cartOpen}
         onClose={() => setCartOpen(false)}
+        onReplaceFlavor={(id, index) => {
+          const set = state.sets.find((x) => x.id === id);
+          if (!set) return;
+          setSheetSetId(id);
+          setSheet({ context: 'cart', flavors: set.flavors, view: 'replace', index, direct: true });
+        }}
         onOpenSet={(id) => {
           const set = state.sets.find((x) => x.id === id);
           if (!set) return;
@@ -128,37 +134,47 @@ function Flow() {
         onPrimary={() => (sheet?.context === 'new' ? addNewSet() : setSheet(null))}
         onClose={() => setSheet(null)}
       />
-      <StatusBar light={statusLight} dim={sheet !== null} />
+      {/* A phone has its own status bar */}
+      {!phone && <StatusBar light={statusLight} dim={sheet !== null} />}
     </>
   );
 }
 
-/** Fits the 390×844 device into the stage on desktop, full screen on a phone. */
-function useDeviceScale(introRef: RefObject<HTMLDivElement | null>) {
-  const [scale, setScale] = useState(1);
+/**
+ * Desktop: the 390×844 device fits the stage. Phone: the 390-wide layout is
+ * scaled to the screen width and is as tall as the screen.
+ */
+function useDevice(introRef: RefObject<HTMLDivElement | null>) {
+  const [device, setDevice] = useState({ scale: 1, height: DEVICE_H, phone: false });
   useLayoutEffect(() => {
     const update = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
       if (w <= 480) {
-        setScale(1);
+        const scale = w / DEVICE_W;
+        setDevice({ scale, height: h / scale, phone: true });
+        document.documentElement.style.setProperty('--device-scale', String(scale));
         return;
       }
       const stacked = w <= 1100;
       const introHeight = stacked ? (introRef.current?.offsetHeight ?? 0) + 28 : 0;
       const free = h - 48 - introHeight - (stacked ? 16 : 0);
-      setScale(Math.max(0.5, Math.min(1, free / DEVICE_H, (w - 48) / DEVICE_W)));
+      setDevice({ scale: Math.max(0.5, Math.min(1, free / DEVICE_H, (w - 48) / DEVICE_W)), height: DEVICE_H, phone: false });
     };
     update();
     window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
+    window.visualViewport?.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.visualViewport?.removeEventListener('resize', update);
+    };
   }, [introRef]);
-  return scale;
+  return device;
 }
 
 export function App() {
   const introRef = useRef<HTMLDivElement>(null);
-  const scale = useDeviceScale(introRef);
+  const { scale, height, phone } = useDevice(introRef);
   return (
     <StoreProvider>
       <main className={stage.stage}>
@@ -168,9 +184,13 @@ export function App() {
             Snickers: любые три вкуса за 178 ₽. Каталог, карточка с набором, замена вкусов и корзина.
           </p>
         </div>
-        <div className={stage.deviceBox} style={{ width: DEVICE_W * scale, height: DEVICE_H * scale }}>
-          <div className={stage.device} data-device style={{ transform: scale === 1 ? undefined : `scale(${scale})` }}>
-            <Flow />
+        <div className={stage.deviceBox} style={{ width: DEVICE_W * scale, height: height * scale }}>
+          <div
+            className={stage.device}
+            data-device
+            style={{ height, transform: scale === 1 ? undefined : `scale(${scale})` }}
+          >
+            <Flow phone={phone} />
           </div>
         </div>
       </main>

@@ -1,12 +1,11 @@
 import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react';
-import { BONUS, COOKIE_PRICE, PRICE, SET_FULL, SET_PRICE, type FlavorId } from './data';
+import { BONUS, PRICE, SET_FULL, SET_PRICE, type FlavorId } from './data';
 
 export type CartSet = { id: string; flavors: FlavorId[]; qty: number };
 
 export type State = {
   singles: Record<FlavorId, number>;
   sets: CartSet[];
-  cookie: number;
   leaveAtDoor: boolean;
   forOther: boolean;
   useBonus: boolean;
@@ -18,18 +17,16 @@ type Action =
   | { type: 'addSet'; id: string; flavors: FlavorId[] }
   | { type: 'setQty'; id: string; delta: 1 | -1 }
   | { type: 'replace'; id: string; index: number; flavor: FlavorId }
-  | { type: 'cookie'; delta: 1 | -1 }
   | { type: 'toggle'; key: 'leaveAtDoor' | 'forOther' | 'useBonus' }
   | { type: 'favorite'; flavor: FlavorId };
 
 const initial: State = {
   singles: { les: 0, arahis: 0, bel: 0 },
   sets: [],
-  // The cookie is already in the cart, as on E4
-  cookie: 1,
   leaveAtDoor: true,
   forOther: false,
-  useBonus: true,
+  // Bonuses are off until the buyer turns them on
+  useBonus: false,
   favorites: [],
 };
 
@@ -59,8 +56,6 @@ function reducer(state: State, action: Action): State {
           s.id === action.id ? { ...s, flavors: s.flavors.map((f, i) => (i === action.index ? action.flavor : f)) } : s,
         ),
       };
-    case 'cookie':
-      return { ...state, cookie: Math.max(0, state.cookie + action.delta) };
     case 'toggle':
       return { ...state, [action.key]: !state[action.key] };
     case 'favorite':
@@ -83,7 +78,7 @@ export function singlesTotals(singles: Record<FlavorId, number>) {
 export function totals(state: State) {
   const s = singlesTotals(state.singles);
   const setsQty = state.sets.reduce((sum, set) => sum + set.qty, 0);
-  const items = setsQty * SET_PRICE + s.paid + state.cookie * COOKIE_PRICE;
+  const items = setsQty * SET_PRICE + s.paid;
   const promo = setsQty * (SET_FULL - SET_PRICE) + s.free * PRICE;
   const bonus = state.useBonus ? Math.min(BONUS, items) : 0;
   return {
@@ -92,7 +87,7 @@ export function totals(state: State) {
     bonus,
     discount: promo + bonus,
     total: items > 0 ? items + 49 - bonus : 0,
-    lines: setsQty + s.count + state.cookie,
+    lines: setsQty + s.count,
   };
 }
 

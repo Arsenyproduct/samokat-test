@@ -20,18 +20,27 @@
   left: 0;
   right: 0;
   top: 48px;
-  height: 796px;
-  bottom: auto;
+  bottom: 0;
   overflow: hidden;
   border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   background: var(--bg-card);
   transform: translateY(100%);
   transition: transform var(--dur-sheet) var(--ease-sheet);
-  touch-action: none;
   user-select: none;
 }
 .shown .sheet {
   transform: none;
+}
+/* Photo, buttons and content scroll together; the add bar stays */
+.scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* ---------- Photo 370×330 at (10,10) ---------- */
@@ -144,11 +153,11 @@
 
 /* ---------- Content at (0,356), px20, gap14 ---------- */
 .content {
-  position: absolute;
-  left: 0;
-  top: 356px;
+  position: relative;
   width: 390px;
-  padding: 0 20px;
+  /* margin, not padding: the photo and its buttons above stay tappable */
+  margin-top: 356px;
+  padding: 0 20px calc(96px + 40px + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -204,6 +213,9 @@
     color 220ms var(--ease-out),
     transform var(--dur-fast) var(--ease-out);
 }
+.chipName {
+  animation: swap-in 320ms var(--ease-out) both;
+}
 button.chip:active {
   transform: scale(0.95);
 }
@@ -214,14 +226,6 @@ button.chip:active {
 .chipStatic {
   cursor: default;
 }
-.dot {
-  flex: none;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.08);
-}
-
 /* ---------- Набор · как комбо ---------- */
 .setBlock {
   display: grid;
@@ -323,13 +327,71 @@ button.chip:active {
   font-size: 17px;
 }
 
+/* ---------- Details under the fold ---------- */
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 6px;
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.h3 {
+  font: 600 17px/22px var(--font);
+  color: var(--text-primary);
+}
+.text {
+  font: 500 15px/20px var(--font);
+  color: var(--text-primary);
+}
+.nutrition {
+  display: flex;
+}
+.nutrient {
+  flex: 1 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nutrient b {
+  font: 700 20px/24px var(--font);
+  color: var(--text-primary);
+}
+.nutrient span {
+  font: 500 13px/17px var(--font);
+  color: var(--text-secondary);
+}
+.facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font: 500 15px/20px var(--font);
+}
+.fact dt {
+  color: var(--text-secondary);
+}
+.fact dd {
+  margin: 0;
+  color: var(--text-primary);
+  text-align: right;
+}
+
 /* ---------- Add bar ---------- */
 .addBar {
   position: absolute;
   left: 0;
-  top: 700px;
+  bottom: 0;
   width: 390px;
-  height: 96px;
+  height: calc(96px + var(--safe-bottom));
   overflow: hidden;
   background: var(--brand-red);
   color: var(--text-on-accent);
@@ -345,7 +407,7 @@ button.chip:active {
 /* 89 ₽ + : gap 10, pb 24 */
 .addSimple {
   position: absolute;
-  inset: 0 0 24px;
+  inset: 0 0 calc(24px + var(--safe-bottom));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -367,7 +429,7 @@ button.chip:active {
 /* − 2 х 89 ₽ + : gap 86, mb −7, «Еще 1 до скидки» 13/17 at .5, pb 32 */
 .addStep {
   position: absolute;
-  inset: 0 0 32px;
+  inset: 0 0 calc(32px + var(--safe-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -458,15 +520,16 @@ button.chip:active {
   }
   100% {
     opacity: 0;
-    transform: translateY(554px) scale(0.1);
+    transform: translateY(var(--fly-y, 554px)) scale(0.1);
   }
 }
 
-/* ---------- Tooltip 188 wide at top 633, centered ---------- */
+/* ---------- Tooltip 188 wide, centered over the add bar ---------- */
 .tooltip {
   position: absolute;
   left: 50%;
-  top: 633px;
+  /* 4 px above the add bar, as at top 633 */
+  bottom: calc(100px + var(--safe-bottom));
   z-index: 2;
   display: flex;
   flex-direction: column;

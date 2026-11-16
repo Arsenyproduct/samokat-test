@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { BONUS, COOKIE_PRICE, flavorOrder, flavors, img, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
+import { BONUS, flavorOrder, flavors, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
 import { totals, useStore, type CartSet } from './store';
 import { Bar, Icons, Roll, SetThumb72, Stepper, Toggle, useDragToClose, useLatest, usePresence } from './ui';
 import s from './Cart.module.css';
@@ -8,17 +8,15 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onOpenSet: (id: string) => void;
+  /** A flavour chip of a set: the replace list opens as a popup */
+  onReplaceFlavor: (id: string, index: number) => void;
 };
 
-/** E4 · Корзина: набор одной строкой (642:3993) and E5 · Замена вкуса в строке (642:4060) */
-export function Cart({ open, onClose, onOpenSet }: Props) {
+/** E4 · Корзина: набор одной строкой (642:3993); a flavour is replaced in the popup list (642:4476) */
+export function Cart({ open, onClose, onOpenSet, onReplaceFlavor }: Props) {
   const { mounted, shown } = usePresence(open, 480);
   const { state, dispatch } = useStore();
   const drag = useDragToClose(onClose);
-  // E5: one flavour chip of one set is picked, the replace panel opens under the row
-  const [editing, setEditing] = useState<{ id: string; index: number } | null>(null);
-  const lastEditing = useLatest(editing);
-
   const sets = useKeepRemoved(state.sets);
 
   if (!mounted) return null;
@@ -76,17 +74,9 @@ export function Cart({ open, onClose, onOpenSet }: Props) {
               <Collapse key={set.id} open={!removed}>
                 <SetRow
                   set={set}
-                  editing={editing?.id === set.id ? editing.index : null}
-                  onPick={(index) =>
-                    setEditing(editing?.id === set.id && editing.index === index ? null : { id: set.id, index })
-                  }
+                  onPick={(index) => onReplaceFlavor(set.id, index)}
                   onOpen={() => onOpenSet(set.id)}
                   onQty={(delta) => dispatch({ type: 'setQty', id: set.id, delta })}
-                  onReplace={(index, flavor) => {
-                    dispatch({ type: 'replace', id: set.id, index, flavor });
-                    setEditing(null);
-                  }}
-                  lastIndex={lastEditing?.id === set.id ? lastEditing.index : 0}
                 />
               </Collapse>
             ))}
@@ -101,24 +91,6 @@ export function Cart({ open, onClose, onOpenSet }: Props) {
                 />
               </Collapse>
             ))}
-
-            <Collapse open={state.cookie > 0}>
-              <div className={s.cartRow}>
-                <img className={s.cookie} src={img.cookie} alt="" />
-                <div className={s.rowInfo}>
-                  <p className={s.rowName}>Печенье Самокат, 27% протеина, с манго, 40 г</p>
-                  <Stepper
-                    count={Math.max(1, state.cookie)}
-                    label="Печенье"
-                    onMinus={() => dispatch({ type: 'cookie', delta: -1 })}
-                    onPlus={() => dispatch({ type: 'cookie', delta: 1 })}
-                  />
-                </div>
-                <span className={s.rowPrice}>
-                  <Roll value={rub(Math.max(1, state.cookie) * COOKIE_PRICE)} />
-                </span>
-              </div>
-            </Collapse>
 
             <Collapse open={t.lines === 0}>
               <p className={s.empty}>В корзине пусто</p>
@@ -183,73 +155,36 @@ export function Cart({ open, onClose, onOpenSet }: Props) {
 
 type SetRowProps = {
   set: CartSet;
-  editing: number | null;
-  lastIndex: number;
   onPick: (index: number) => void;
   onOpen: () => void;
   onQty: (delta: 1 | -1) => void;
-  onReplace: (index: number, flavor: FlavorId) => void;
 };
 
-function SetRow({ set, editing, lastIndex, onPick, onOpen, onQty, onReplace }: SetRowProps) {
-  const isEditing = editing !== null;
-  const index = editing ?? lastIndex;
-  const target = set.flavors[index];
-  const options = flavorOrder.filter((f) => f !== target);
+function SetRow({ set, onPick, onOpen, onQty }: SetRowProps) {
   return (
-    <div className={s.setWrap}>
-      <div className={`${s.setRow} ${isEditing ? s.setRowEditing : ''}`}>
-        <button type="button" className={s.setThumb} onClick={onOpen} aria-label="Открыть набор">
-          <SetThumb72 flavors={set.flavors} />
+    <div className={s.setRow}>
+      <button type="button" className={s.setThumb} onClick={onOpen} aria-label="Открыть набор">
+        <SetThumb72 flavors={set.flavors} />
+      </button>
+      <div className={s.setInfo}>
+        <button type="button" className={s.setTitle} onClick={onOpen}>
+          Snickers, 3 вкуса по цене 2
         </button>
-        <div className={s.setInfo}>
-          <button type="button" className={s.setTitle} onClick={onOpen}>
-            Snickers, 3 вкуса по цене 2
-          </button>
-          <div className={s.setFlavors}>
-            {set.flavors.map((f, i) => (
-              <button
-                key={i}
-                type="button"
-                className={`${s.flavorChip} ${editing === i ? s.flavorChipOn : ''}`}
-                aria-pressed={editing === i}
-                onClick={() => onPick(i)}
-              >
-                <span className={s.flavorDot} style={{ background: flavors[f].dot }} />
-                <span key={f} className={s.flavorName}>
-                  {flavors[f].name}
-                </span>
-                {i === 2 && <b className={s.free}>0 ₽</b>}
-              </button>
-            ))}
-          </div>
-          <Stepper count={set.qty} label="набор Snickers" onMinus={() => onQty(-1)} onPlus={() => onQty(1)} />
+        <div className={s.setFlavors}>
+          {set.flavors.map((f, i) => (
+            <button key={i} type="button" className={s.flavorChip} onClick={() => onPick(i)} aria-label={`Заменить «${flavors[f].name}»`}>
+              <span key={f} className={s.flavorName}>
+                {flavors[f].name}
+              </span>
+              {i === 2 && <b className={s.free}>0 ₽</b>}
+            </button>
+          ))}
         </div>
-        <div className={s.setPrice}>
-          <s className={s.struck}>
-            <Roll value={rub(SET_FULL * set.qty)} />
-          </s>
-          <b>
-            <Roll value={rub(SET_PRICE * set.qty)} />
-          </b>
-        </div>
+        <Stepper count={set.qty} label="набор Snickers" onMinus={() => onQty(-1)} onPlus={() => onQty(1)} />
       </div>
-
-      {/* Замена вкуса: tile r16 p12 gap8 */}
-      <div className={`${s.replaceWrap} ${isEditing ? s.replaceOpen : ''}`} inert={!isEditing}>
-        <div className={s.replaceInner}>
-          <div className={s.replace}>
-            <p className={s.replaceTitle}>Заменить «{flavors[target!].name}» на</p>
-            <div className={s.replaceChips}>
-              {options.map((f) => (
-                <button key={f} type="button" className={s.replaceChip} onClick={() => onReplace(index, f)}>
-                  <span className={s.replaceDot} style={{ background: flavors[f].dot }} />
-                  {flavors[f].name}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className={s.setPrice}>
+        <Roll className={s.struck} value={rub(SET_FULL * set.qty)} />
+        <Roll value={rub(SET_PRICE * set.qty)} />
       </div>
     </div>
   );
@@ -278,7 +213,7 @@ function SingleRow({ flavor, qty, free, onQty }: { flavor: FlavorId; qty: number
         <Stepper count={shownQty} label={flavors[flavor].name} onMinus={() => onQty(-1)} onPlus={() => onQty(1)} />
       </div>
       <span className={s.rowPrice}>
-        <s className={`${s.struck} ${shownFree > 0 ? '' : s.struckHidden}`}>{rub(shownQty * PRICE)}</s>
+        <Roll className={`${s.struck} ${shownFree > 0 ? '' : s.struckHidden}`} value={rub(shownQty * PRICE)} />
         <Roll value={rub((shownQty - shownFree) * PRICE)} />
       </span>
     </div>
