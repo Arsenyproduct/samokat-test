@@ -64,9 +64,9 @@ export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
                   <Icons.plus size={16} className={s.chipPlus} />
                 </span>
                 <span className={s.setBars}>
-                  <Bar flavor="arahis" left={0} top={0} boxW={150.662} boxH={60.053} w={146.574} h={42.507} rotate={7} />
-                  <Bar flavor="bel" left={0.47} top={36.18} boxW={149.721} boxH={55.12} w={146.574} h={42.507} rotate={-5} />
-                  <Bar flavor="les" left={0.37} top={69.88} boxW={149.926} boxH={56.122} w={146.574} h={42.507} rotate={5.4} />
+                  <Bar flavor="arahis" left={2.04} top={8.77} boxW={146.57} boxH={42.51} w={146.57} h={42.51} rotate={0} />
+                  <Bar flavor="bel" left={2.04} top={43.48} boxW={146.57} boxH={42.51} w={146.57} h={42.51} rotate={0} />
+                  <Bar flavor="les" left={2.04} top={76.69} boxW={146.57} boxH={42.51} w={146.57} h={42.51} rotate={0} />
                 </span>
                 {fav(null)}
                 <span className={`${s.tag} ${s.tagDark}`}>-33%</span>

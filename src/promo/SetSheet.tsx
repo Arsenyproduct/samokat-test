@@ -78,7 +78,7 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
           {sheet.flavors.map((f, i) => (
             <div key={i} className={s.position} style={{ top: 106 + i * 122 }}>
               <span className={s.posPhoto}>
-                <Bar key={f} className={s.swapIn} flavor={f} left={4.55} top={28.89} boxW={86.891} boxH={38.222} w={84} h={24} rotate={10} />
+                <Bar key={f} className={s.swapIn} flavor={f} left={6} top={36} boxW={84} boxH={24} w={84} h={24} rotate={0} />
               </span>
               <p key={`n-${f}`} className={`${s.posName} ${s.swapIn}`}>
                 {productTitle(f)}
@@ -119,7 +119,7 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
                 aria-pressed={on}
               >
                 <span className={s.rowPhoto}>
-                  <Bar flavor={f} left={4} top={20.14} boxW={50.592} boxH={22.254} w={48.909} h={13.974} rotate={10} />
+                  <Bar flavor={f} left={6.69} top={24} boxW={45.63} boxH={13.04} w={45.63} h={13.04} rotate={0} />
                 </span>
                 <span className={s.rowName}>{productTitle(f)}</span>
                 <span className={s.rowPrice}>

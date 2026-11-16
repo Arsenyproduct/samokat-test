@@ -108,24 +108,24 @@ export function Bar({ flavor, left, top, boxW, boxH, w, h, rotate, className }: 
   );
 }
 
-/** Three bars as the set thumbnail (E2 «Фото · набор», 104 px) */
+/** Three bars in a row, the set thumbnail on E2 («Фото · набор», 104 px) */
 export function SetThumb104({ flavors }: { flavors: FlavorId[] }) {
   return (
     <>
-      <Bar flavor={flavors[2]!} left={5.91} top={14.18} boxW={92.188} boxH={38.195} w={89.44} h={26} rotate={8} />
-      <Bar flavor={flavors[1]!} left={6.48} top={35.91} boxW={91.036} boxH={32.176} w={89.44} h={26} rotate={-4} />
-      <Bar flavor={flavors[0]!} left={6.66} top={55.4} boxW={90.678} boxH={30.645} w={89.44} h={26} rotate={3} />
+      <Bar flavor={flavors[2]!} left={9} top={20} boxW={86} boxH={25} w={86} h={25} rotate={0} />
+      <Bar flavor={flavors[1]!} left={9} top={40} boxW={86} boxH={25} w={86} h={25} rotate={0} />
+      <Bar flavor={flavors[0]!} left={9} top={60} boxW={86} boxH={25} w={86} h={25} rotate={0} />
     </>
   );
 }
 
-/** Three bars of the cart row (E4 «Фото · набор», 72 px) */
+/** Three bars in a row, the cart row thumbnail on E4 (72 px) */
 export function SetThumb72({ flavors }: { flavors: FlavorId[] }) {
   return (
     <>
-      <Bar flavor={flavors[2]!} left={7.37} top={5.92} boxW={61.256} boxH={36.154} w={59} h={17} rotate={20} />
-      <Bar flavor={flavors[1]!} left={5.98} top={27.46} boxW={60.042} boxH={21.074} w={59} h={17} rotate={4} />
-      <Bar flavor={flavors[0]!} left={3.47} top={38.51} boxW={61.056} boxH={26.987} w={59} h={17} rotate={-10} />
+      <Bar flavor={flavors[2]!} left={3} top={10} boxW={67} boxH={19.5} w={67} h={19.5} rotate={0} />
+      <Bar flavor={flavors[1]!} left={3} top={28.25} boxW={67} boxH={19.5} w={67} h={19.5} rotate={0} />
+      <Bar flavor={flavors[0]!} left={3} top={46.5} boxW={67} boxH={19.5} w={67} h={19.5} rotate={0} />
     </>
   );
 }

@@ -68,7 +68,7 @@
 /*
  * The cut-out bars sit exactly over the bar of the photo (346.9×100.86 at 11.56,105).
  * In the set mode the photo fades, the middle bar settles and the other two
- * slide out from under it.
+ * slide out from under it, one up and one down, into a row as on the E2 card after adding.
  */
 .bars {
   position: absolute;
@@ -100,15 +100,15 @@
   transform: none;
 }
 .setMode .barMid {
-  transform: translate(0, 17px) rotate(-4deg) scale(0.7);
+  transform: translate(0, 10px) scale(0.72);
   transition: transform 720ms var(--ease-spring) 80ms;
 }
 .setMode .barTop {
-  transform: translate(6px, -62px) rotate(7deg) scale(0.7);
+  transform: translate(0, -48px) scale(0.72);
   transition: transform 820ms var(--ease-spring) 180ms;
 }
 .setMode .barBottom {
-  transform: translate(-4px, 97px) rotate(5.4deg) scale(0.7);
+  transform: translate(0, 68px) scale(0.72);
   transition: transform 820ms var(--ease-spring) 240ms;
 }
 

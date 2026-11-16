@@ -95,8 +95,8 @@ export function Product(props: Props) {
             />
           ))}
           <div className={s.bars} aria-hidden="true">
-            <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[1]!)} alt="" draggable={false} />
-            <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[2]!)} alt="" draggable={false} />
+            <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" draggable={false} />
+            <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" draggable={false} />
             <img className={`${s.heroBar} ${s.barMid}`} src={img.bar(setMode ? setFlavors[0]! : flavor)} alt="" draggable={false} />
           </div>
         </div>
@@ -230,8 +230,8 @@ export function Product(props: Props) {
         {flying && (
           <div className={`${s.ghost} ${s.setMode}`} style={{ ['--fly-y' as string]: `${flyY}px` }} aria-hidden="true">
             <div className={s.bars}>
-              <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[1]!)} alt="" />
-              <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[2]!)} alt="" />
+              <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" />
+              <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" />
               <img className={`${s.heroBar} ${s.barMid}`} src={img.bar(setFlavors[0]!)} alt="" />
             </div>
           </div>
