@@ -1,6 +1,7 @@
 import { flavors, rub, type FlavorId } from './data';
 import { totals, useStore } from './store';
 import { Bar, Icons, Roll } from './ui';
+import { Tray } from './Tray';
 import s from './Catalog.module.css';
 
 type Card = { kind: 'single'; flavor: FlavorId } | { kind: 'set' };
@@ -19,11 +20,14 @@ type Props = {
   hidden: boolean;
   onOpen: (flavor: FlavorId) => void;
   onOpenSet: () => void;
+  /** «178 ₽ +» on the «3 любых вкуса» tile */
+  onAddSet: () => void;
+  onBuildSet: () => void;
   onCart: () => void;
 };
 
 /** E1 · Каталог «Сладкое» (642:3734) */
-export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
+export function Catalog({ hidden, onOpen, onOpenSet, onAddSet, onBuildSet, onCart }: Props) {
   const { state, dispatch } = useStore();
   const t = totals(state);
   // The cart button shows up with the first Snickers (E1 has none)
@@ -59,10 +63,10 @@ export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
                   <span className={s.secondary}>Если сложно определиться</span>
                 </p>
                 <p className={`${s.weight} ${s.invisible}`}>81 г · </p>
-                <span className={s.chip}>
+                <button type="button" className={s.chip} onClick={onAddSet} aria-label="Добавить набор за 178 ₽">
                   {rub(178)}
                   <Icons.plus size={16} className={s.chipPlus} />
-                </span>
+                </button>
                 <span className={s.setBars}>
                   <Bar flavor="arahis" left={2.04} top={8.77} boxW={146.57} boxH={42.51} w={146.57} h={42.51} rotate={0} />
                   <Bar flavor="bel" left={2.04} top={43.48} boxW={146.57} boxH={42.51} w={146.57} h={42.51} rotate={0} />
@@ -84,10 +88,37 @@ export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
                 <p className={s.weight}>
                   81 г · <span className={s.green}>Любые вкусы</span>
                 </p>
-                <span className={s.chip}>
-                  {rub(89)}
-                  <Icons.plus size={16} className={s.chipPlus} />
-                </span>
+                {state.singles[card.flavor] > 0 ? (
+                  <span className={`${s.chip} ${s.chipCount}`}>
+                    <button
+                      type="button"
+                      className={s.chipStep}
+                      aria-label={`Убрать: ${flavors[card.flavor].name}`}
+                      onClick={() => dispatch({ type: 'single', flavor: card.flavor, delta: -1 })}
+                    >
+                      <Icons.minus size={16} />
+                    </button>
+                    <Roll value={state.singles[card.flavor]} className={s.chipNum} />
+                    <button
+                      type="button"
+                      className={s.chipStep}
+                      aria-label={`Добавить: ${flavors[card.flavor].name}`}
+                      onClick={() => dispatch({ type: 'single', flavor: card.flavor, delta: 1 })}
+                    >
+                      <Icons.plus size={16} />
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    className={s.chip}
+                    aria-label={`В корзину: ${flavors[card.flavor].name}, 89 ₽`}
+                    onClick={() => dispatch({ type: 'single', flavor: card.flavor, delta: 1 })}
+                  >
+                    {rub(89)}
+                    <Icons.plus size={16} className={s.chipPlus} />
+                  </button>
+                )}
                 <Bar flavor={card.flavor} left={6} top={66} boxW={168} boxH={49} w={168} h={49} rotate={0} />
                 {fav(card.flavor)}
                 <span className={`${s.tag} ${i === 2 ? s.tagLeft10 : ''}`}>3 по цене 2</span>
@@ -103,6 +134,14 @@ export function Catalog({ hidden, onOpen, onOpenSet, onCart }: Props) {
         </button>
         <h1 className={s.title}>Сладкое</h1>
       </header>
+
+      {/* The same tray as on the card: it shows up after the first bar */}
+      <Tray
+        className={s.trayPlace}
+        open={!hidden && state.units.length > 0}
+        units={state.units}
+        onEmpty={onBuildSet}
+      />
 
       <button type="button" className={s.search}>
         <Icons.search size={22} />

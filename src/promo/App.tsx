@@ -68,6 +68,15 @@ function Flow({ phone }: { phone: boolean }) {
     toCart();
   };
 
+  /** An empty cell of the tray: the set with the bars so far and the missing slots */
+  const openBuild = () => {
+    const rest = state.units.length % 3;
+    const picked = state.units.slice(state.units.length - rest);
+    const flavors: (FlavorId | null)[] = [...picked, ...Array<null>(3 - picked.length).fill(null)];
+    setSheetSetId(null);
+    setSheet({ context: 'build', flavors, view: 'positions', index: 0 });
+  };
+
   // A sheet over a cart set follows the set in the store
   const cartSet = sheetSetId ? state.sets.find((x) => x.id === sheetSetId) : undefined;
   const sheetView = sheet && cartSet ? { ...sheet, flavors: cartSet.flavors } : sheet;
@@ -87,6 +96,8 @@ function Flow({ phone }: { phone: boolean }) {
           openProduct('les');
           later(() => setProduct((p) => (p ? { ...p, mode: 'set' } : p)), 420);
         }}
+        onAddSet={() => dispatch({ type: 'addSet', id: nextId(), flavors: defaultSet('les') })}
+        onBuildSet={openBuild}
         onCart={() => setCartOpen(true)}
       />
       <Product
@@ -108,13 +119,7 @@ function Flow({ phone }: { phone: boolean }) {
           setSheet({ context: 'card', flavors: product.setFlavors, view: 'replace', index, direct: true });
         }}
         onAddSet={addFromCard}
-        onBuildSet={() => {
-          const rest = state.units.length % 3;
-          const picked = state.units.slice(state.units.length - rest);
-          const flavors: (FlavorId | null)[] = [...picked, ...Array<null>(3 - picked.length).fill(null)];
-          setSheetSetId(null);
-          setSheet({ context: 'build', flavors, view: 'positions', index: 0 });
-        }}
+        onBuildSet={openBuild}
       />
       <Cart
         open={cartOpen}

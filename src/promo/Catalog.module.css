@@ -110,8 +110,10 @@
   opacity: 0;
 }
 
-/* Chip/Add: red tint, 12/10 × 5, gap 6, Bold 15/22 + plus 16 */
+/* Chip/Add: red tint, 12/10 × 5, gap 6, Bold 15/22 + plus 16; it adds to the cart */
 .chip {
+  position: relative;
+  z-index: 2;
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
@@ -125,6 +127,48 @@
 }
 .chipPlus {
   color: var(--brand-red);
+}
+button.chip {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+button.chip:active {
+  transform: scale(0.94);
+}
+/* After the first tap: − count + in the same chip */
+.chipCount {
+  gap: 12px;
+  padding: 5px 10px;
+  animation: chip-in 260ms var(--ease-out);
+}
+@keyframes chip-in {
+  from {
+    transform: scale(0.94);
+  }
+}
+.chipStep {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--brand-red);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.chipStep::before {
+  content: '';
+  position: absolute;
+  inset: -10px -8px;
+}
+.chipStep:active {
+  transform: scale(0.8);
+}
+.chipNum {
+  min-width: 10px;
+}
+/* The tray sits 12 px above the search pill */
+.trayPlace {
+  z-index: 3;
+  bottom: calc(96px + var(--safe-bottom));
 }
 
 /* Three bars of «3 любых вкуса» at (15,32), 151×126 */

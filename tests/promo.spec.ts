@@ -177,5 +177,21 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
   await expect(cart.locator('[data-open="true"] [class*=rowName]')).toHaveCount(0);
   await shot('cart-auto-set');
 
+  // Catalog: the price chip adds to the cart without opening the card, the tray shows up
+  await closeCart();
+  await page.getByRole('button', { name: nb('В корзину: Белый, 89 ₽') }).first().click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText('Ещё 2, и третий за 0 ₽')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Убрать: Белый' }).first()).toBeVisible();
+  await shot('catalog-chip-tray');
+  await page.getByRole('button', { name: 'Добавить: Белый' }).first().click();
+  await expect(page.getByText('Ещё 1, и он за 0 ₽')).toBeVisible();
+  await page.getByRole('button', { name: 'Добавить: Белый' }).first().click();
+  // The third bar made a set: the tray leaves, the chip is back to «89 ₽ +»
+  await expect(page.getByText(/и он за 0 ₽|и третий за 0 ₽/)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: nb('В корзину: Белый, 89 ₽') }).first()).toBeVisible();
+  await page.getByRole('button', { name: /^Корзина/ }).click();
+  await expect(setRows).toHaveCount(5);
+
   expect(problems).toEqual([]);
 });

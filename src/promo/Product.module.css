@@ -504,77 +504,9 @@ button.chip:active {
   display: none;
 }
 
-/* ---------- Лоток (651:988): 358×68 dark pill 12 px above the add bar ---------- */
-.tray {
-  position: absolute;
-  left: 16px;
-  right: 16px;
+/* The tray sits 12 px above the add bar */
+.trayPlace {
   bottom: calc(108px + var(--safe-bottom));
-  height: 68px;
-  z-index: 2;
-  border-radius: 24px;
-  background: var(--bg-dark-pill);
-  filter: drop-shadow(0 6px 9px rgba(0, 0, 0, 0.2));
-  opacity: 0;
-  transform: translateY(16px) scale(0.98);
-  transition:
-    opacity 220ms var(--ease-out),
-    transform 380ms var(--ease-spring);
-}
-.trayShown {
-  opacity: 1;
-  transform: none;
-}
-.cell {
-  position: absolute;
-  top: 9px;
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.14);
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-.cell:nth-child(1) {
-  left: 9px;
-}
-.cell:nth-child(2) {
-  left: 65px;
-}
-.cell:nth-child(3) {
-  left: 121px;
-}
-button.cell:active {
-  transform: scale(0.92);
-}
-.cellFilled {
-  background: #fff;
-  animation: cell-in 380ms var(--ease-spring) both;
-}
-@keyframes cell-in {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-}
-/* «0 ₽» badge on the free cell: green, Bold 11, at (23,−6) */
-.cellFree {
-  position: absolute;
-  left: 23px;
-  top: -6px;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--state-green);
-  font: 700 11px/14px var(--font);
-  color: var(--text-on-accent);
-  white-space: nowrap;
-}
-.trayText {
-  position: absolute;
-  left: 180px;
-  top: 25px;
-  width: 170px;
-  font: 600 15px/19px var(--font);
-  color: var(--text-on-accent);
 }
 
 /* ---------- Flight: a copy of the three bars lifts off the photo and drops into the add bar ---------- */

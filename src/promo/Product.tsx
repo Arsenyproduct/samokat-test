@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { details, facts, flavorList, flavorOrder, flavors, img, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
 import { useStore } from './store';
-import { Bar, Icons, Roll, SetThumb104, useLatest, usePresence, useScrollSheetDrag } from './ui';
+import { Icons, Roll, SetThumb104, useLatest, usePresence, useScrollSheetDrag } from './ui';
+import { Tray } from './Tray';
 import s from './Product.module.css';
 
 export type ProductView = {
@@ -181,7 +182,7 @@ export function Product(props: Props) {
           </div>
         </div>
 
-        <Tray open={trayOpen} units={state.units.slice(state.units.length - rest)} onEmpty={onBuildSet} />
+        <Tray className={s.trayPlace} open={trayOpen} units={state.units.slice(state.units.length - rest)} onEmpty={onBuildSet} />
 
         {/* Add bar: «89 ₽ +» → «2 х 89 ₽» with − / +; on the set «Добавить за 178 ₽» */}
         <div className={`${s.addBar} ${stepper ? s.addStepper : ''} ${flying ? s.addLanding : ''}`}>
@@ -235,37 +236,6 @@ export function Product(props: Props) {
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-/**
- * Лоток (651:988): dark pill above the add bar. Filled cells show the bars
- * added so far, the third cell is the free one; a tap on an empty cell
- * opens the set with the missing slot.
- */
-function Tray({ open, units, onEmpty }: { open: boolean; units: FlavorId[]; onEmpty: () => void }) {
-  const { mounted, shown } = usePresence(open, 320);
-  const last = useLatest(open ? units : null) ?? units;
-  if (!mounted) return null;
-  const left = 3 - last.length;
-  return (
-    <div className={`${s.tray} ${shown ? s.trayShown : ''}`} role="group" aria-label="Набор: 3 по цене 2">
-      {[0, 1, 2].map((i) => {
-        const f = last[i];
-        return f ? (
-          <span key={`${i}-${f}`} className={`${s.cell} ${s.cellFilled}`}>
-            <Bar flavor={f} left={4} top={19} boxW={42} boxH={12} w={42} h={12} rotate={0} />
-          </span>
-        ) : (
-          <button key={i} type="button" className={s.cell} onClick={onEmpty} aria-label={i === 2 ? 'Выбрать вкус за 0 ₽' : 'Выбрать вкус'}>
-            {i === 2 && <span className={s.cellFree}>0 ₽</span>}
-          </button>
-        );
-      })}
-      <p className={s.trayText}>
-        <Roll value={left === 1 ? 'Ещё 1, и он за 0 ₽' : 'Ещё 2, и третий за 0 ₽'} />
-      </p>
     </div>
   );
 }
