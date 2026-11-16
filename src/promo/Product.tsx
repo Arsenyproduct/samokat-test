@@ -182,7 +182,13 @@ export function Product(props: Props) {
           </div>
         </div>
 
-        <Tray className={s.trayPlace} open={trayOpen} units={state.units.slice(state.units.length - rest)} onEmpty={onBuildSet} />
+        <Tray
+          className={s.trayPlace}
+          open={trayOpen && !state.trayHidden}
+          units={state.units.slice(state.units.length - rest)}
+          onEmpty={onBuildSet}
+          onDismiss={() => dispatch({ type: 'hideTray' })}
+        />
 
         {/* Add bar: «89 ₽ +» → «2 х 89 ₽» with − / +; on the set «Добавить за 178 ₽» */}
         <div className={`${s.addBar} ${stepper ? s.addStepper : ''} ${flying ? s.addLanding : ''}`}>

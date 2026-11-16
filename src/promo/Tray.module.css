@@ -18,6 +18,18 @@
   opacity: 1;
   transform: none;
 }
+/* Swiped away to the left */
+.tray {
+  touch-action: pan-y;
+  user-select: none;
+}
+.trayShown.trayGone {
+  opacity: 0;
+  transform: translateX(-110%);
+  transition:
+    opacity 240ms var(--ease-out),
+    transform 240ms var(--ease-out);
+}
 .cell {
   position: absolute;
   top: 9px;

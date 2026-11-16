@@ -9,6 +9,8 @@ export type State = {
   units: FlavorId[];
   /** Ids of the sets that three single bars made by themselves */
   autoSeq: number;
+  /** The tray was swiped away; it comes back with the next set */
+  trayHidden: boolean;
   sets: CartSet[];
   leaveAtDoor: boolean;
   forOther: boolean;
@@ -24,12 +26,14 @@ type Action =
   | { type: 'setQty'; id: string; delta: 1 | -1 }
   | { type: 'replace'; id: string; index: number; flavor: FlavorId }
   | { type: 'toggle'; key: 'leaveAtDoor' | 'forOther' | 'useBonus' }
-  | { type: 'favorite'; flavor: FlavorId };
+  | { type: 'favorite'; flavor: FlavorId }
+  | { type: 'hideTray' };
 
 const initial: State = {
   singles: { les: 0, arahis: 0, bel: 0 },
   units: [],
   autoSeq: 0,
+  trayHidden: false,
   sets: [],
   leaveAtDoor: true,
   forOther: false,
@@ -39,6 +43,12 @@ const initial: State = {
 };
 
 function reducer(state: State, action: Action): State {
+  const next = step(state, action);
+  // Once the bars of the tray are gone (a set or removed), the tray may show up again
+  return next.trayHidden && next.units.length === 0 ? { ...next, trayHidden: false } : next;
+}
+
+function step(state: State, action: Action): State {
   switch (action.type) {
     case 'single': {
       if (action.delta > 0) {
@@ -102,6 +112,8 @@ function reducer(state: State, action: Action): State {
       };
     case 'toggle':
       return { ...state, [action.key]: !state[action.key] };
+    case 'hideTray':
+      return { ...state, trayHidden: true };
     case 'favorite':
       return {
         ...state,

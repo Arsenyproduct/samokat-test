@@ -138,9 +138,10 @@ export function Catalog({ hidden, onOpen, onOpenSet, onAddSet, onBuildSet, onCar
       {/* The same tray as on the card: it shows up after the first bar */}
       <Tray
         className={s.trayPlace}
-        open={!hidden && state.units.length > 0}
+        open={!hidden && state.units.length > 0 && !state.trayHidden}
         units={state.units}
         onEmpty={onBuildSet}
+        onDismiss={() => dispatch({ type: 'hideTray' })}
       />
 
       <button type="button" className={s.search}>

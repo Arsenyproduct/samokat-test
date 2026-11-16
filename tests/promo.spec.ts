@@ -186,6 +186,16 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
   await shot('catalog-chip-tray');
   await page.getByRole('button', { name: 'Добавить: Белый' }).first().click();
   await expect(page.getByText('Ещё 1, и он за 0 ₽')).toBeVisible();
+
+  // The tray is swiped away to the left and stays hidden until the next set
+  const tray = page.getByRole('group', { name: /Набор: 3 по цене 2/ });
+  const box = (await tray.boundingBox())!;
+  await page.mouse.move(box.x + box.width - 40, box.y + box.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(box.x + box.width - 40 - i * 25, box.y + box.height / 2);
+  await page.mouse.up();
+  await expect(tray).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Убрать: Белый' }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Добавить: Белый' }).first().click();
   // The third bar made a set: the tray leaves, the chip is back to «89 ₽ +»
   await expect(page.getByText(/и он за 0 ₽|и третий за 0 ₽/)).toHaveCount(0);
