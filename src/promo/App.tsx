@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { defaultSet, type FlavorId } from './data';
 import { StoreProvider, useStore } from './store';
 import { Catalog } from './Catalog';
@@ -11,10 +11,9 @@ import stage from './Stage.module.css';
 const DEVICE_W = 390;
 const DEVICE_H = 844;
 
-/* Timeline of «Добавить за 178 ₽» */
-const SHEET_AWAY = 240; // the set sheet slides down
-const SPREAD = 880; // two bars slide out from under the middle one
-const FLIGHT = 560; // the set flies into the add bar
+/* Timeline of «Добавить за 178 ₽» on the set card */
+const FLIGHT = 560; // the set flies from the photo into the add bar
+const TO_CART = 260; // the card slides away, the cart comes up
 
 function Flow({ phone }: { phone: boolean }) {
   const { state, dispatch } = useStore();
@@ -23,7 +22,6 @@ function Flow({ phone }: { phone: boolean }) {
   const [sheetSetId, setSheetSetId] = useState<string | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [flying, setFlying] = useState(false);
-  const [tooltipClosed, setTooltipClosed] = useState(false);
   const timers = useRef<number[]>([]);
   const counter = useRef(0);
 
@@ -32,38 +30,40 @@ function Flow({ phone }: { phone: boolean }) {
   };
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
-  const openProduct = (flavor: FlavorId) =>
-    setProduct({ flavor, mode: 'single', setId: null, setFlavors: defaultSet(flavor) });
-
-  const openNewSet = (flavor: FlavorId) => {
-    setSheetSetId(null);
-    setSheet({ context: 'new', flavors: defaultSet(flavor), view: 'positions', index: 0 });
-  };
-
-  /** The flight from the photo, then the set lands in the cart */
-  const flyIntoCart = useCallback((flavors: FlavorId[]) => {
+  const nextId = () => {
     counter.current += 1;
-    const id = `set-${counter.current}`;
-    setFlying(true);
-    setProduct((p) => (p ? { ...p, mode: 'set', setId: id, setFlavors: flavors } : p));
-    later(() => {
-      dispatch({ type: 'addSet', id, flavors });
-      setFlying(false);
-    }, FLIGHT - 80);
-  }, [dispatch]);
-
-  const addNewSet = () => {
-    if (!sheet || !product) return;
-    const flavors = sheet.flavors;
-    setSheet(null);
-    // The card turns into the set: text and photo change, the bars spread out
-    later(() => setProduct((p) => (p ? { ...p, mode: 'set', setId: null, setFlavors: flavors } : p)), SHEET_AWAY);
-    later(() => flyIntoCart(flavors), SHEET_AWAY + SPREAD);
+    return `set-${counter.current}`;
   };
 
-  // The sheet keeps its own copy of the flavours; a set in the cart changes in the store
-  const replaceInSheet = (index: number, flavor: FlavorId) => {
-    if (sheetSetId) dispatch({ type: 'replace', id: sheetSetId, index, flavor });
+  const openProduct = (flavor: FlavorId, mode: ProductView['mode'] = 'single') =>
+    setProduct({ flavor, mode, setFlavors: defaultSet(flavor) });
+
+  /** Card → cart: the card goes down, the cart comes up */
+  const toCart = () => {
+    setSheet(null);
+    setProduct(null);
+    later(() => setCartOpen(true), TO_CART);
+  };
+
+  /** Сценарий 1: «Добавить за 178 ₽» on the set card */
+  const addFromCard = () => {
+    if (!product || flying) return;
+    const flavors = product.setFlavors;
+    setFlying(true);
+    later(() => {
+      dispatch({ type: 'addSet', id: nextId(), flavors });
+      setFlying(false);
+      toCart();
+    }, FLIGHT);
+  };
+
+  /** Сценарий 2: the bars from the tray and the chosen third become one set */
+  const buildSet = () => {
+    if (!sheet) return;
+    const flavors = sheet.flavors.filter((f): f is FlavorId => f !== null);
+    const take = state.units.length % 3;
+    dispatch({ type: 'merge', id: nextId(), flavors, take });
+    toCart();
   };
 
   // A sheet over a cart set follows the set in the store
@@ -79,31 +79,36 @@ function Flow({ phone }: { phone: boolean }) {
     <>
       <Catalog
         hidden={product !== null || cartOpen}
-        onOpen={openProduct}
+        onOpen={(flavor) => openProduct(flavor)}
         onOpenSet={() => {
+          // «3 любых вкуса»: the card opens and turns into the set
           openProduct('les');
-          later(() => openNewSet('les'), 260);
+          later(() => setProduct((p) => (p ? { ...p, mode: 'set' } : p)), 420);
         }}
         onCart={() => setCartOpen(true)}
       />
       <Product
         view={product}
         flying={flying}
-        tooltip={!tooltipClosed}
-        onCloseTooltip={() => setTooltipClosed(true)}
         onClose={() => {
           setProduct(null);
           setSheet(null);
         }}
         onFlavor={(flavor) => setProduct((p) => (p ? { ...p, flavor, setFlavors: defaultSet(flavor) } : p))}
-        onOpenSet={() => product && openNewSet(product.flavor)}
+        onShowSet={() => setProduct((p) => (p ? { ...p, mode: 'set' } : p))}
         onEditSetFlavor={(index) => {
           if (!product) return;
-          const id = product.setId && state.sets.some((x) => x.id === product.setId) ? product.setId : null;
-          setSheetSetId(id);
-          setSheet({ context: id ? 'cart' : 'new', flavors: product.setFlavors, view: 'replace', index, direct: true });
+          setSheetSetId(null);
+          setSheet({ context: 'card', flavors: product.setFlavors, view: 'replace', index, direct: true });
         }}
-        onAddSetAgain={() => product && flyIntoCart(product.setFlavors)}
+        onAddSet={addFromCard}
+        onBuildSet={() => {
+          const rest = state.units.length % 3;
+          const picked = state.units.slice(state.units.length - rest);
+          const flavors: (FlavorId | null)[] = [...picked, ...Array<null>(3 - picked.length).fill(null)];
+          setSheetSetId(null);
+          setSheet({ context: 'build', flavors, view: 'positions', index: 0 });
+        }}
       />
       <Cart
         open={cartOpen}
@@ -125,13 +130,13 @@ function Flow({ phone }: { phone: boolean }) {
         sheet={sheetView}
         onChange={setSheet}
         onReplace={(index, flavor) => {
-          replaceInSheet(index, flavor);
-          // The card shows the same set while it is open
-          setProduct((p) =>
-            p && p.mode === 'set' ? { ...p, setFlavors: p.setFlavors.map((f, i) => (i === index ? flavor : f)) } : p,
-          );
+          if (sheet?.context === 'cart' && sheetSetId) dispatch({ type: 'replace', id: sheetSetId, index, flavor });
+          // The set card shows the new flavour right away
+          if (sheet?.context === 'card') {
+            setProduct((p) => (p ? { ...p, setFlavors: p.setFlavors.map((f, i) => (i === index ? flavor : f)) } : p));
+          }
         }}
-        onPrimary={() => (sheet?.context === 'new' ? addNewSet() : setSheet(null))}
+        onPrimary={() => (sheet?.context === 'build' ? buildSet() : setSheet(null))}
         onClose={() => setSheet(null)}
       />
       {/* A phone has its own status bar */}

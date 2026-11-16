@@ -5,6 +5,8 @@ export type CartSet = { id: string; flavors: FlavorId[]; qty: number };
 
 export type State = {
   singles: Record<FlavorId, number>;
+  /** Single bars in the order they were added: the tray of the card shows the last ones */
+  units: FlavorId[];
   sets: CartSet[];
   leaveAtDoor: boolean;
   forOther: boolean;
@@ -15,6 +17,8 @@ export type State = {
 type Action =
   | { type: 'single'; flavor: FlavorId; delta: 1 | -1 }
   | { type: 'addSet'; id: string; flavors: FlavorId[] }
+  /** The last `take` single bars and the chosen third become one set */
+  | { type: 'merge'; id: string; flavors: FlavorId[]; take: number }
   | { type: 'setQty'; id: string; delta: 1 | -1 }
   | { type: 'replace'; id: string; index: number; flavor: FlavorId }
   | { type: 'toggle'; key: 'leaveAtDoor' | 'forOther' | 'useBonus' }
@@ -22,6 +26,7 @@ type Action =
 
 const initial: State = {
   singles: { les: 0, arahis: 0, bel: 0 },
+  units: [],
   sets: [],
   leaveAtDoor: true,
   forOther: false,
@@ -33,8 +38,31 @@ const initial: State = {
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'single': {
-      const next = Math.max(0, state.singles[action.flavor] + action.delta);
-      return { ...state, singles: { ...state.singles, [action.flavor]: next } };
+      if (action.delta > 0) {
+        return {
+          ...state,
+          singles: { ...state.singles, [action.flavor]: state.singles[action.flavor] + 1 },
+          units: [...state.units, action.flavor],
+        };
+      }
+      const at = state.units.lastIndexOf(action.flavor);
+      if (at < 0) return state;
+      return {
+        ...state,
+        singles: { ...state.singles, [action.flavor]: state.singles[action.flavor] - 1 },
+        units: state.units.filter((_, i) => i !== at),
+      };
+    }
+    case 'merge': {
+      const taken = state.units.slice(state.units.length - action.take);
+      const singles = { ...state.singles };
+      taken.forEach((f) => (singles[f] -= 1));
+      return {
+        ...state,
+        singles,
+        units: state.units.slice(0, state.units.length - action.take),
+        sets: [...state.sets, { id: action.id, flavors: action.flavors, qty: 1 }],
+      };
     }
     case 'addSet': {
       if (state.sets.some((s) => s.id === action.id)) {

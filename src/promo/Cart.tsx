@@ -193,7 +193,7 @@ function SetRow({ set, onPick, onOpen, onQty }: SetRowProps) {
 /** Rows fold away instead of jumping; the content stays while it folds. */
 function Collapse({ open, children }: { open: boolean; children: ReactNode }) {
   return (
-    <div className={`${s.collapse} ${open ? '' : s.collapsed}`} inert={!open}>
+    <div className={`${s.collapse} ${open ? '' : s.collapsed}`} inert={!open} data-open={open}>
       <div className={s.collapseInner}>{children}</div>
     </div>
   );

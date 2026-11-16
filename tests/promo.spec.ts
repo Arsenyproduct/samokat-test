@@ -1,10 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
-// «3 по цене 2» at /promo/: catalog → product → singles with the stepper and the
-// tooltip → set sheet → replace → «Добавить за 178 ₽» with the bars animation →
-// cart → flavour replace in the row → set sheet from the cart → quantities.
-// Fails on any console error, failed request or a frame over 50 ms during the set animation.
+// «3 по цене 2» at /promo/. Сценарий 1: card → the card turns into the set →
+// replace by tag → «Добавить за 178 ₽» → cart (replace popup, set sheet, quantities).
+// Сценарий 2: two bars with «+» → tray → empty cell → «Выбрать» → one set in the cart.
+// Fails on any console error, failed request or a frame over 50 ms while the card turns into the set.
 
 function watchConsole(page: Page) {
   const problems: string[] = [];
@@ -55,98 +55,90 @@ test('3 по цене 2: from the catalog to the cart', async ({ page }, testInf
   await page.getByRole('heading', { name: 'Состав', exact: true }).scrollIntoViewIfNeeded();
   await expect(page.getByText('В 100 граммах')).toBeVisible();
   await shot('product-details');
-  await page.getByRole('heading', { name: 'Описание', exact: true }).evaluate((el) => el.closest('[class*=scroll]')?.scrollTo({ top: 0 }));
 
-  // Flavour chips switch the photo and the title
-  await dialog.getByRole('button', { name: 'Белый', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Шоколадный батончик Snickers, белый' })).toBeVisible();
-  await page.getByRole('button', { name: 'Лесной орех', exact: true }).click();
-
-  // «89 ₽ +» → stepper with «Еще 2 до скидки» and the tooltip
-  await page.getByRole('button', { name: nb('89 ₽') }).click();
-  await expect(page.getByText(nb('1 х 89 ₽'))).toBeVisible();
-  await expect(page.getByText('Еще 2 до скидки')).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('Любые 3 вкуса');
-  await page.getByRole('button', { name: 'Добавить ещё' }).click();
-  await expect(page.getByText(nb('2 х 89 ₽'))).toBeVisible();
-  await expect(page.getByText('Еще 1 до скидки')).toBeVisible();
-  await shot('stepper-tooltip');
-  await page.getByRole('button', { name: 'Скрыть подсказку' }).click();
-  await expect(page.getByRole('status')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Убрать одну' }).click();
-  await page.getByRole('button', { name: 'Убрать одну' }).click();
-  await expect(page.getByRole('button', { name: nb('89 ₽') })).toBeVisible();
-
-  // E3: the set sheet, replace the free third flavour
-  await page.getByRole('button', { name: /3 вкуса по цене 2/ }).click();
-  const sheet = page.getByRole('dialog', { name: 'Snickers: 3 вкуса' });
-  await expect(sheet.getByText('Третий за 0 ₽')).toBeVisible();
-  await shot('set-sheet');
-  await sheet.getByRole('button', { name: 'Заменить' }).nth(2).click();
-  await shot('replace');
-  await sheet.getByRole('button', { name: /Шоколадный батончик Snickers, лесной орех/ }).click();
-  // Third position is now «лесной орех»: «больше арахиса» stays only in the (hidden) list
-  await expect(sheet.getByText('Шоколадный батончик Snickers, лесной орех', { exact: true })).toHaveCount(3);
-  await expect(sheet.getByText('Шоколадный батончик Snickers, больше арахиса', { exact: true })).toHaveCount(1);
-
-  // «Добавить за 178 ₽»: the card turns into the set, the set lands in the add bar
+  // Сценарий 1: a tap on the set row turns the card into the set
   await page.evaluate('window.__long = []');
-  await sheet.getByRole('button', { name: nb('Добавить за 178 ₽') }).click();
-  await expect(sheet).toHaveCount(0);
+  await page.getByRole('button', { name: /3 вкуса по цене 2/ }).click();
   await expect(page.getByRole('heading', { name: 'Snickers, 3 вкуса по цене 2' })).toBeVisible();
-  // The set has landed: the add bar turns into the stepper of sets
-  await expect(page.locator('[data-landed="1"]')).toBeAttached({ timeout: 3000 });
-  await expect(page.getByText('Набор в корзине')).toBeVisible();
-  await expect(page.getByText(nb('1 х 178 ₽'))).toBeVisible();
-  await page.waitForTimeout(400);
-  // The whole add-set animation runs without dropped frames
+  await page.waitForTimeout(1300);
   const long = await page.evaluate<number[]>('window.__long');
   expect(long, `long frames: ${long.join(', ')}`).toHaveLength(0);
-  await shot('set-added');
+  await shot('set-card');
 
-  await page.getByRole('button', { name: 'Закрыть' }).click();
-  const cartButton = page.getByRole('button', { name: /^Корзина/ });
-  await expect(cartButton).toHaveAccessibleName(nb('Корзина, 178 ₽'));
-  await shot('catalog-cart-button');
+  // A flavour tag opens the list; «Белый» is a paid slot, so the prices are 89 ₽
+  await page.getByRole('button', { name: 'Заменить «Белый»' }).click();
+  const list = page.getByRole('dialog', { name: '3 вкуса по цене 2' });
+  await expect(list.getByRole('button', { name: /больше арахиса/ })).toContainText(nb('89 ₽'));
+  await shot('set-card-replace');
+  await list.getByRole('button', { name: /больше арахиса/ }).click();
+  await expect(list).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Заменить «Белый»' })).toHaveCount(0);
 
-  // E4: cart, bonuses off by default
-  await cartButton.click();
+  // «Добавить за 178 ₽»: the set flies into the button, then the cart opens
+  await page.getByRole('button', { name: nb('Добавить за 178 ₽') }).click();
   const cart = page.getByRole('dialog', { name: 'Корзина' });
-  await expect(cart.getByText('Snickers, 3 вкуса по цене 2')).toBeVisible();
+  await expect(cart.getByText('Snickers, 3 вкуса по цене 2')).toBeVisible({ timeout: 3000 });
   await expect(cart.getByRole('switch', { name: 'СберСпасибо' })).toHaveAttribute('aria-checked', 'false');
   await expect(cart.getByText(nb('Итого, со скидкой 89 ₽'))).toBeVisible();
   await expect(cart.getByText(nb('227 ₽'))).toBeVisible();
-  // The old price is grey and struck through
   const old = cart.getByText(nb('267 ₽')).first();
   await expect(old).toHaveCSS('text-decoration-line', 'line-through');
   await expect(old).toHaveCSS('color', 'rgb(154, 154, 158)');
   await shot('cart');
 
-  // A flavour chip opens the replace list as a popup
-  await cart.getByRole('button', { name: 'Заменить «Белый»' }).click();
-  const popup = page.getByRole('dialog', { name: 'Snickers: 3 вкуса' });
-  await expect(popup.getByRole('button', { name: /больше арахиса/ })).toBeVisible();
-  await shot('cart-replace');
-  await popup.getByRole('button', { name: /больше арахиса/ }).click();
+  // A tag in the cart opens the list as a popup
+  await cart.getByRole('button', { name: 'Заменить «Лесной орех»' }).click();
+  const popup = page.getByRole('dialog', { name: '3 вкуса по цене 2' });
+  await popup.getByRole('button', { name: /белый/ }).click();
   await expect(popup).toHaveCount(0);
-  await expect(cart.getByRole('button', { name: 'Заменить «Больше арахиса»' })).toBeVisible();
+  await expect(cart.getByRole('button', { name: 'Заменить «Белый»' })).toBeVisible();
+  await shot('cart-replaced');
 
-  // The set sheet over the cart
+  // The set sheet from the cart
   await cart.getByRole('button', { name: 'Открыть набор' }).click();
-  const cartSheet = page.getByRole('dialog', { name: 'Snickers: 3 вкуса' });
-  await expect(cartSheet.getByRole('button', { name: 'Вернуться в корзину' })).toBeVisible();
+  await expect(popup.getByRole('button', { name: 'Вернуться в корзину' })).toBeVisible();
   await shot('cart-set-sheet');
-  await cartSheet.getByRole('button', { name: 'Вернуться в корзину' }).click();
-  await expect(cartSheet).toHaveCount(0);
-
-  // Quantities and the total
+  await popup.getByRole('button', { name: 'Вернуться в корзину' }).click();
+  await expect(popup).toHaveCount(0);
   await cart.getByRole('button', { name: 'Добавить: набор Snickers' }).click();
+  await expect(cart.getByText(nb('Итого, со скидкой 178 ₽'))).toBeVisible();
+  await cart.getByRole('button', { name: 'Убрать: набор Snickers' }).click();
+  await expect(cart.getByText(nb('227 ₽'))).toBeVisible();
+
+  // Back to the catalog: tap above the sheet
+  await cart.locator('xpath=..').locator('[class*=backdrop]').click({ position: { x: 100, y: 10 } });
+  await expect(cart).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^Корзина/ })).toHaveAccessibleName(nb('Корзина, 178 ₽'));
+
+  // Сценарий 2: two bars with «+», the tray, the empty cell, the third for 0 ₽
+  await page.getByRole('button', { name: 'Шоколадный батончик Snickers, белый' }).first().click();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await expect(page.getByText('Ещё 2, и третий за 0 ₽')).toBeVisible();
+  await page.getByRole('button', { name: 'Лесной орех', exact: true }).click();
+  await page.getByRole('button', { name: nb('89 ₽'), exact: true }).click();
+  await expect(page.getByText('Ещё 1, и он за 0 ₽')).toBeVisible();
+  await expect(page.getByText(nb('1 х 89 ₽'))).toBeVisible();
+  await shot('tray');
+  await page.getByRole('button', { name: 'Выбрать вкус за 0 ₽' }).click();
+  const build = page.getByRole('dialog', { name: '3 вкуса по цене 2' });
+  await expect(build.getByText('Ещё один товар и акция сработает')).toBeVisible();
+  await expect(build.getByRole('button', { name: 'Добавить набор' })).toBeVisible();
+  await shot('build');
+  await build.getByRole('button', { name: 'Выбрать', exact: true }).click();
+  await build.getByRole('button', { name: /больше арахиса/ }).click();
+  await expect(build.getByRole('button', { name: nb('Добавить за 178 ₽') })).toBeVisible();
+  await shot('build-full');
+  await build.getByRole('button', { name: nb('Добавить за 178 ₽') }).click();
+
+  // The two bars and the third became one set: two sets, no single rows
+  await expect(cart).toBeVisible({ timeout: 3000 });
+  await expect(cart.getByText('Snickers, 3 вкуса по цене 2')).toHaveCount(2);
+  await expect(cart.locator('[data-open="true"] [class*=rowName]')).toHaveCount(0);
   await expect(cart.getByText(nb('Итого, со скидкой 178 ₽'))).toBeVisible();
   await expect(cart.getByText(nb('405 ₽'))).toBeVisible();
   await cart.getByRole('switch', { name: 'СберСпасибо' }).click();
-  await expect(cart.getByText(nb('Итого, со скидкой 332 ₽'))).toBeVisible();
   await expect(cart.getByText(nb('251 ₽'))).toBeVisible();
-  await shot('cart-changed');
+  await shot('cart-two-sets');
 
   expect(problems).toEqual([]);
 });

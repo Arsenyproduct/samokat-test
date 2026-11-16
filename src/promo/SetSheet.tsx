@@ -4,9 +4,10 @@ import { Bar, useDragToClose, useLatest, usePresence } from './ui';
 import s from './SetSheet.module.css';
 
 export type SetSheetView = {
-  /** new: from the product card; cart: a set already in the cart */
-  context: 'new' | 'cart';
-  flavors: FlavorId[];
+  /** build: сценарий 2, the set is put together from the tray; card: a flavour chip of the set card; cart: a set in the cart */
+  context: 'build' | 'card' | 'cart';
+  /** null is an empty slot («Выбрать») */
+  flavors: (FlavorId | null)[];
   view: 'positions' | 'replace';
   index: number;
   /** Opened straight on the replace list (a flavour chip of the set): one pick closes it */
@@ -25,8 +26,9 @@ const POSITIONS_H = 606;
 const ROW_STEP = 86;
 
 /**
- * E3 · Шторка набора (642:3899) and E3 · Замена вкуса (642:4476);
+ * E3 · Шторка набора (642:3899, 655:1206) and E3 · Замена вкуса (642:4476);
  * from the cart it is the same sheet with «Вернуться в корзину» (642:4060).
+ * A flavour chip opens the list straight away (655:1091, 661:1332).
  */
 export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose }: Props) {
   const { mounted, shown } = usePresence(live !== null, 480);
@@ -40,8 +42,10 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
 
   const replace = sheet.view === 'replace';
   const height = replace ? 14 + flavorOrder.length * ROW_STEP + 22 : POSITIONS_H;
-  const current = sheet.flavors[sheet.index];
+  const current = sheet.flavors[sheet.index] ?? null;
   const free = sheet.index === 2;
+  const complete = sheet.flavors.every(Boolean);
+  const firstEmpty = sheet.flavors.findIndex((f) => !f);
 
   const pick = (f: FlavorId) => {
     if (picked) return;
@@ -66,29 +70,29 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
         className={s.dim}
         onClick={() => (replace && !sheet.direct ? onChange({ ...sheet, view: 'positions' }) : onClose())}
       />
-      <div className={s.sheet} style={style} {...drag.handlers} role="dialog" aria-label="Snickers: 3 вкуса">
+      <div className={s.sheet} style={style} {...drag.handlers} role="dialog" aria-label="3 вкуса по цене 2">
         <span className={s.grabber} />
         <div className={s.clip}>
         {/* Positions */}
         <div className={`${s.page} ${replace ? s.pageOut : ''}`} inert={replace}>
           <div className={s.cards}>
           <div className={s.cardsInner}>
-          <p className={s.title}>Snickers: 3 вкуса</p>
+          <p className={s.title}>3 вкуса по цене 2</p>
           <p className={s.subtitle}>Третий за 0 ₽</p>
           {sheet.flavors.map((f, i) => (
             <div key={i} className={s.position} style={{ top: 106 + i * 122 }}>
               <span className={s.posPhoto}>
-                <Bar key={f} className={s.swapIn} flavor={f} left={6} top={36} boxW={84} boxH={24} w={84} h={24} rotate={0} />
+                {f && <Bar key={f} className={s.swapIn} flavor={f} left={6} top={36} boxW={84} boxH={24} w={84} h={24} rotate={0} />}
               </span>
               <p key={`n-${f}`} className={`${s.posName} ${s.swapIn}`}>
-                {productTitle(f)}
+                {f ? productTitle(f) : i < 2 && sheet.flavors.filter((x) => !x).length > 1 ? 'Выберите второй вкус' : 'Ещё один товар и акция сработает'}
               </p>
               <button type="button" className={s.replaceButton} onClick={() => onChange({ ...sheet, view: 'replace', index: i })}>
-                Заменить
+                {f ? 'Заменить' : 'Выбрать'}
               </button>
               {i === 2 ? (
                 <span className={`${s.posPrice} ${s.posPriceFree}`}>
-                  <s>{rub(PRICE)}</s>
+                  {f && <s>{rub(PRICE)}</s>}
                   <b>0 ₽</b>
                 </span>
               ) : (
@@ -100,8 +104,17 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
           ))}
           </div>
           </div>
-          <button type="button" className={s.primary} onClick={onPrimary}>
-            {sheet.context === 'new' ? `Добавить за ${rub(SET_PRICE)}` : 'Вернуться в корзину'}
+          <button
+            type="button"
+            className={s.primary}
+            onClick={() =>
+              // «Добавить набор» with an empty slot opens the list for it first
+              sheet.context === 'build' && !complete ? onChange({ ...sheet, view: 'replace', index: firstEmpty }) : onPrimary()
+            }
+          >
+            <span key={sheet.context === 'build' ? String(complete) : 'cart'} className={s.swapIn}>
+              {sheet.context === 'cart' ? 'Вернуться в корзину' : complete ? `Добавить за ${rub(SET_PRICE)}` : 'Добавить набор'}
+            </span>
           </button>
         </div>
 
@@ -140,7 +153,7 @@ export function SetSheet({ sheet: live, onChange, onReplace, onPrimary, onClose 
               </button>
             );
           })}
-          <span className="visually-hidden">Выберите вкус вместо «{flavors[current!].name}»</span>
+          <span className="visually-hidden">{current ? `Выберите вкус вместо «${flavors[current].name}»` : 'Выберите вкус'}</span>
         </div>
         </div>
       </div>

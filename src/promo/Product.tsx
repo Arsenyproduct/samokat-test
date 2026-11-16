@@ -1,32 +1,35 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { details, facts, flavorList, flavorOrder, flavors, img, PRICE, productTitle, rub, SET_FULL, SET_PRICE, type FlavorId } from './data';
-import { singlesTotals, useStore } from './store';
-import { Icons, Roll, SetThumb104, useLatest, usePresence, useScrollSheetDrag } from './ui';
+import { useStore } from './store';
+import { Bar, Icons, Roll, SetThumb104, useLatest, usePresence, useScrollSheetDrag } from './ui';
 import s from './Product.module.css';
 
 export type ProductView = {
   flavor: FlavorId;
+  /** single: one flavour; set: the card turned into the set (E2 · Карточка набора) */
   mode: 'single' | 'set';
-  /** Cart set this card shows in the set mode */
-  setId: string | null;
   setFlavors: FlavorId[];
 };
 
 type Props = {
   view: ProductView | null;
+  /** The set flies from the photo into the add bar, then the cart opens */
   flying: boolean;
-  tooltip: boolean;
-  onCloseTooltip: () => void;
   onClose: () => void;
   onFlavor: (flavor: FlavorId) => void;
-  onOpenSet: () => void;
+  onShowSet: () => void;
   onEditSetFlavor: (index: number) => void;
-  onAddSetAgain: () => void;
+  onAddSet: () => void;
+  /** Tap on an empty cell of the tray */
+  onBuildSet: () => void;
 };
 
-/** E2 · Карточка: набор как комбо (642:3783), with the stepper of 642:3838 */
+/**
+ * E2 · Карточка (642:3783). Сценарий 1: тап по строке набора превращает карточку
+ * в набор (654:159). Сценарий 2: «+» копит вкусы в лотке (651:914).
+ */
 export function Product(props: Props) {
-  const { view: liveView, flying, tooltip, onCloseTooltip, onClose, onFlavor, onOpenSet, onEditSetFlavor, onAddSetAgain } = props;
+  const { view: liveView, flying, onClose, onFlavor, onShowSet, onEditSetFlavor, onAddSet, onBuildSet } = props;
   const { mounted, shown } = usePresence(liveView !== null, 480);
   const view = useLatest(liveView);
   const { state, dispatch } = useStore();
@@ -55,21 +58,14 @@ export function Product(props: Props) {
 
   const { flavor } = view;
   const setMode = view.mode === 'set';
-  const cartSet = view.setId ? state.sets.find((x) => x.id === view.setId) : undefined;
-  const setFlavors = cartSet?.flavors ?? view.setFlavors;
-  const setQty = cartSet?.qty ?? 0;
+  const setFlavors = view.setFlavors;
   const qty = state.singles[flavor];
-  const singles = singlesTotals(state.singles);
   const fav = state.favorites.includes(flavor);
+  const stepper = !setMode && qty > 0;
 
-  // Add bar: «89 ₽ +», then «2 х 89 ₽» with − / + and the hint under it
-  const stepper = setMode ? setQty > 0 && !flying : qty > 0;
-  const left = 3 - (singles.count % 3);
-  const caption = setMode
-    ? 'Набор в корзине'
-    : left === 3
-      ? 'Скидка сработала'
-      : `Еще ${left} до скидки`;
+  // Tray: the bars added towards the next free one (two cells filled, the third is 0 ₽)
+  const rest = state.units.length % 3;
+  const trayOpen = !setMode && rest > 0;
 
   const sheetStyle = drag.dragging
     ? { transform: `translateY(${drag.dy}px)`, transition: 'none' }
@@ -82,106 +78,111 @@ export function Product(props: Props) {
       <div className={s.backdrop} onClick={onClose} />
       <div ref={sheetRef} className={s.sheet} style={sheetStyle} role="dialog" aria-label={setMode ? 'Набор Snickers' : productTitle(flavor)}>
         <div ref={scrollRef} className={s.scroll}>
-        {/* Photo 370×330 at (10,10), r22 */}
-        <div className={`${s.photo} ${setMode ? s.setMode : ''}`}>
-          {flavorOrder.map((f) => (
-            <img
-              key={f}
-              className={s.heroImg}
-              src={img.hero(f)}
-              alt=""
-              draggable={false}
-              style={{ opacity: !setMode && f === flavor ? 1 : 0 }}
-            />
-          ))}
-          <div className={s.bars} aria-hidden="true">
-            <img className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" draggable={false} />
-            <img className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" draggable={false} />
-            <img className={`${s.heroBar} ${s.barMid}`} src={img.bar(setMode ? setFlavors[0]! : flavor)} alt="" draggable={false} />
+          {/* Photo 370×330 at (10,10), r22 */}
+          <div className={`${s.photo} ${setMode ? s.setMode : ''}`}>
+            {flavorOrder.map((f) => (
+              <img
+                key={f}
+                className={s.heroImg}
+                src={img.hero(f)}
+                alt=""
+                draggable={false}
+                style={{ opacity: !setMode && f === flavor ? 1 : 0 }}
+              />
+            ))}
+            <div className={s.bars} aria-hidden="true">
+              <img key={`t-${setFlavors[2]}`} className={`${s.heroBar} ${s.barTop}`} src={img.bar(setFlavors[2]!)} alt="" draggable={false} />
+              <img key={`b-${setFlavors[1]}`} className={`${s.heroBar} ${s.barBottom}`} src={img.bar(setFlavors[1]!)} alt="" draggable={false} />
+              <img key={`m-${setMode ? setFlavors[0] : flavor}`} className={`${s.heroBar} ${s.barMid}`} src={img.bar(setMode ? setFlavors[0]! : flavor)} alt="" draggable={false} />
+            </div>
           </div>
-        </div>
 
-        <span className={s.promoTag}>3 по цене 2</span>
-        <button type="button" className={`${s.iconButton} ${s.heart} ${fav ? s.heartOn : ''}`} aria-label="В избранное" aria-pressed={fav} onClick={() => dispatch({ type: 'favorite', flavor })}>
-          <Icons.heart size={22} filled={fav} />
-        </button>
-        <button type="button" className={`${s.iconButton} ${s.close}`} aria-label="Закрыть" onClick={onClose}>
-          <Icons.close size={22} />
-        </button>
+          {/* «3 по цене 2» on a flavour, «−33%» on the set */}
+          <span className={`${s.promoTag} ${setMode ? s.tagHidden : ''}`}>3 по цене 2</span>
+          <span className={`${s.promoTag} ${s.setTagTop} ${setMode ? '' : s.tagHidden}`}>−33%</span>
+          <button type="button" className={`${s.iconButton} ${s.heart} ${fav ? s.heartOn : ''}`} aria-label="В избранное" aria-pressed={fav} onClick={() => dispatch({ type: 'favorite', flavor })}>
+            <Icons.heart size={22} filled={fav} />
+          </button>
+          <button type="button" className={`${s.iconButton} ${s.close}`} aria-label="Закрыть" onClick={onClose}>
+            <Icons.close size={22} />
+          </button>
 
-        {/* Content at (0,356), px20, gap14 */}
-        <div className={s.content}>
-          <div key={setMode ? 'set' : 'single'} className={`${s.swap} ${setMode ? s.swapSet : ''}`}>
-            <h2 className={s.title}>{setMode ? 'Snickers, 3 вкуса по цене 2' : productTitle(flavor)}</h2>
-            <p className={s.weight}>{setMode ? '3 × 81 г' : '81 г'}</p>
-            <div className={s.flavors}>
-              <p className={s.label}>{setMode ? 'Вкусы в наборе' : 'Вкус'}</p>
-              <div className={s.chips}>
-                {setMode
-                  ? setFlavors.map((f, i) => (
-                      <button key={i} type="button" className={s.chip} onClick={() => onEditSetFlavor(i)}>
-                        <span key={f} className={s.chipName}>
-                          {flavors[f].name}
-                        </span>
-                      </button>
-                    ))
-                  : [
-                      ...flavorOrder.map((f) => (
-                        <button
-                          key={f}
-                          type="button"
-                          className={`${s.chip} ${f === flavor ? s.chipOn : ''}`}
-                          aria-pressed={f === flavor}
-                          onClick={() => onFlavor(f)}
-                        >
-                          {flavors[f].name}
+          {/* Content at (0,356), px20, gap14 */}
+          <div className={s.content}>
+            <div key={setMode ? 'set' : 'single'} className={`${s.swap} ${setMode ? s.swapSet : ''}`}>
+              <h2 className={s.title}>{setMode ? 'Snickers, 3 вкуса по цене 2' : productTitle(flavor)}</h2>
+              <p className={s.weight}>{setMode ? '3 × 81 г' : '81 г'}</p>
+              <div className={s.flavors}>
+                <p className={s.label}>{setMode ? 'Вкусы в наборе' : 'Вкус'}</p>
+                <div className={s.chips}>
+                  {setMode
+                    ? setFlavors.map((f, i) => (
+                        <button key={i} type="button" className={s.chip} onClick={() => onEditSetFlavor(i)} aria-label={`Заменить «${flavors[f].name}»`}>
+                          <span key={f} className={s.chipName}>
+                            {flavors[f].name}
+                          </span>
                         </button>
-                      )),
-                      <span key="espresso" className={`${s.chip} ${s.chipStatic}`}>
-                        Эспрессо
-                      </span>,
-                    ]}
+                      ))
+                    : [
+                        ...flavorOrder.map((f) => (
+                          <button
+                            key={f}
+                            type="button"
+                            className={`${s.chip} ${f === flavor ? s.chipOn : ''}`}
+                            aria-pressed={f === flavor}
+                            onClick={() => onFlavor(f)}
+                          >
+                            {flavors[f].name}
+                          </button>
+                        )),
+                        <span key="espresso" className={`${s.chip} ${s.chipStatic}`}>
+                          Эспрессо
+                        </span>,
+                      ]}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Набор · как комбо */}
-          <div className={`${s.setBlock} ${setMode ? s.setBlockHidden : ''}`} inert={setMode}>
-            <div className={s.setInner}>
-              <div className={s.divider} />
-              <button type="button" className={s.setRow} onClick={onOpenSet}>
-                <span className={s.setPhoto}>
-                  <SetThumb104 flavors={view.setFlavors} />
-                  <span className={s.setTag}>−33%</span>
-                </span>
-                <span className={s.setText}>
-                  <span className={s.setTitle}>3 вкуса по цене 2</span>
-                  <span className={s.setSub}>{flavorList(view.setFlavors)}</span>
-                  <span className={s.setSpacer} />
-                  <span className={s.setPrice}>
-                    <b>{rub(SET_PRICE)}</b>
-                    <s>{rub(SET_FULL)}</s>
-                    <span className={s.arrow}>→</span>
+            {/* Набор: a tap turns the card into the set */}
+            <div className={`${s.setBlock} ${setMode ? s.setBlockHidden : ''}`} inert={setMode}>
+              <div className={s.setInner}>
+                <div className={s.divider} />
+                <button type="button" className={s.setRow} onClick={onShowSet}>
+                  <span className={s.setPhoto}>
+                    <SetThumb104 flavors={view.setFlavors} />
+                    <span className={s.setTag}>−33%</span>
                   </span>
-                </span>
-              </button>
-              <div className={s.divider} />
+                  <span className={s.setText}>
+                    <span className={s.setTitle}>3 вкуса по цене 2</span>
+                    <span className={s.setSub}>{flavorList(view.setFlavors)}</span>
+                    <span className={s.setSpacer} />
+                    <span className={s.setPrice}>
+                      <b>{rub(SET_PRICE)}</b>
+                      <s>{rub(SET_FULL)}</s>
+                      <span className={s.arrow}>→</span>
+                    </span>
+                  </span>
+                </button>
+                <div className={s.divider} />
+              </div>
             </div>
+            <Details setMode={setMode} flavor={flavor} setFlavors={setFlavors} />
           </div>
-                  <Details setMode={setMode} flavor={flavor} setFlavors={setFlavors} />
-        </div>
         </div>
 
-        {/* Add bar, #ff335f, h96 at 700 */}
-        <div className={`${s.addBar} ${stepper ? s.addStepper : ''}`} data-landed={setMode && setQty > 0 ? setQty : undefined}>
+        <Tray open={trayOpen} units={state.units.slice(state.units.length - rest)} onEmpty={onBuildSet} />
+
+        {/* Add bar: «89 ₽ +» → «2 х 89 ₽» with − / +; on the set «Добавить за 178 ₽» */}
+        <div className={`${s.addBar} ${stepper ? s.addStepper : ''} ${flying ? s.addLanding : ''}`}>
           <button
             type="button"
             className={s.addSimple}
             tabIndex={stepper ? -1 : 0}
-            onClick={() => (setMode ? onAddSetAgain() : dispatch({ type: 'single', flavor, delta: 1 }))}
+            disabled={flying}
+            onClick={() => (setMode ? onAddSet() : dispatch({ type: 'single', flavor, delta: 1 }))}
           >
-            <Roll value={rub(setMode ? SET_PRICE : PRICE)} />
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+            <Roll value={setMode ? `Добавить за ${rub(SET_PRICE)}` : rub(PRICE)} />
+            <svg className={`${s.addPlus} ${setMode ? s.addPlusHidden : ''}`} width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
               <path d="M13 5.42V20.58M5.42 13H20.58" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
@@ -191,38 +192,24 @@ export function Product(props: Props) {
                 type="button"
                 className={`${s.stepButton} ${s.stepMinus}`}
                 aria-label="Убрать одну"
-                onClick={() =>
-                  setMode && view.setId
-                    ? dispatch({ type: 'setQty', id: view.setId, delta: -1 })
-                    : dispatch({ type: 'single', flavor, delta: -1 })
-                }
+                onClick={() => dispatch({ type: 'single', flavor, delta: -1 })}
               >
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path d="M5.42 13H20.58" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
                 </svg>
               </button>
-              <Roll
-                className={s.stepLabel}
-                value={setMode ? `${Math.max(1, setQty)} х ${rub(SET_PRICE)}` : `${Math.max(1, qty)} х ${rub(PRICE)}`}
-              />
+              <Roll className={s.stepLabel} value={`${Math.max(1, qty)} х ${rub(PRICE)}`} />
               <button
                 type="button"
                 className={`${s.stepButton} ${s.stepPlus}`}
                 aria-label="Добавить ещё"
-                onClick={() =>
-                  setMode && view.setId
-                    ? dispatch({ type: 'setQty', id: view.setId, delta: 1 })
-                    : dispatch({ type: 'single', flavor, delta: 1 })
-                }
+                onClick={() => dispatch({ type: 'single', flavor, delta: 1 })}
               >
                 <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
                   <path d="M13 5.42V20.58M5.42 13H20.58" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>
-            <p className={s.caption}>
-              <Roll value={caption} />
-            </p>
           </div>
         </div>
 
@@ -236,33 +223,38 @@ export function Product(props: Props) {
             </div>
           </div>
         )}
-
-        <Tooltip open={tooltip && !setMode && qty > 0} onClose={onCloseTooltip} />
       </div>
     </div>
   );
 }
 
-/** DS Tooltip (641:226), Arrow=Bottom, above the add bar (top 633) */
-function Tooltip({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { mounted, shown } = usePresence(open, 220);
+/**
+ * Лоток (651:988): dark pill above the add bar. Filled cells show the bars
+ * added so far, the third cell is the free one; a tap on an empty cell
+ * opens the set with the missing slot.
+ */
+function Tray({ open, units, onEmpty }: { open: boolean; units: FlavorId[]; onEmpty: () => void }) {
+  const { mounted, shown } = usePresence(open, 320);
+  const last = useLatest(open ? units : null) ?? units;
   if (!mounted) return null;
+  const left = 3 - last.length;
   return (
-    <div className={`${s.tooltip} ${shown ? s.tooltipShown : ''}`} role="status">
-      <div className={s.tooltipBody}>
-        <p>
-          Любые 3 вкуса —
-          <br />и скидка сработает
-        </p>
-        <button type="button" className={s.tooltipClose} aria-label="Скрыть подсказку" onClick={onClose}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
-      <svg className={s.tooltipArrow} width="18" height="9" viewBox="0 0 18 9" fill="none" aria-hidden="true">
-        <path d="M0 0H18L11.83 6.17C10.27 7.73 7.73 7.73 6.17 6.17L0 0Z" fill="currentColor" />
-      </svg>
+    <div className={`${s.tray} ${shown ? s.trayShown : ''}`} role="group" aria-label="Набор: 3 по цене 2">
+      {[0, 1, 2].map((i) => {
+        const f = last[i];
+        return f ? (
+          <span key={`${i}-${f}`} className={`${s.cell} ${s.cellFilled}`}>
+            <Bar flavor={f} left={4} top={19} boxW={42} boxH={12} w={42} h={12} rotate={0} />
+          </span>
+        ) : (
+          <button key={i} type="button" className={s.cell} onClick={onEmpty} aria-label={i === 2 ? 'Выбрать вкус за 0 ₽' : 'Выбрать вкус'}>
+            {i === 2 && <span className={s.cellFree}>0 ₽</span>}
+          </button>
+        );
+      })}
+      <p className={s.trayText}>
+        <Roll value={left === 1 ? 'Ещё 1, и он за 0 ₽' : 'Ещё 2, и третий за 0 ₽'} />
+      </p>
     </div>
   );
 }
